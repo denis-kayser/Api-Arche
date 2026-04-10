@@ -42,7 +42,7 @@ export const signInModel = {
 
       if (!isMatch) {
         return {
-          ok: true,
+          ok: false,
           code: ValidationErrorCode.INVALID_PASSWORD,
           message: 'Contraseña incorrecta',
           data: [],
