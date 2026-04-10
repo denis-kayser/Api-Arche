@@ -27,8 +27,8 @@ export const signInModel = {
 
       if (result.rows.length === 0) {
         return {
-          ok: true,
-          code: SuccessCode.SUCCESS,
+          ok: false,
+          code: ValidationErrorCode.INVALID_EMAIL,
           message: 'Usuario no encontrado',
           data: [],
         };

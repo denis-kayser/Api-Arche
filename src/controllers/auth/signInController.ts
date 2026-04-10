@@ -25,24 +25,15 @@ export const signInController = {
       const data: UserRegisterProps = { email, password };
 
       const result = await signInService.Credentials(data);
+  
 
-      if (result.ok) {
-        return response.error(
-          res,
-          ErrorCode.UNAUTHORIZED,
-          result.message || 'Credenciales inválidas',
-          401
-        );
-      }
+      return res.status(200).json({
+        ok: result.ok,
+        code: result.code,
+        message: result.message || 'Usuario logueado correctamente',
+        data: result.data
+      })
 
-
-      return response.success(
-        res,
-        SuccessCode.SUCCESS,
-        result.message || 'Usuario logueado correctamente',
-        result.data,
-        200
-      );
 
     } catch (error) {
       console.error('Controller Error:', error);
@@ -83,7 +74,7 @@ export const signInController = {
       const result = await signInService.Google(user);
 
       console.log(result);
-      
+
 
 
       return response.success(
