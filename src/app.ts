@@ -21,7 +21,7 @@ app.use('/api/v1', authRouter); // autenticacion
 
 
 // Rutas privadas
-app.use('/api/v1', authMiddleware) // verificar Token
+// app.use('/api/v1', authMiddleware) // verificar Token
 app.use('/api/v1', userRouter); // usuarios
 
 // Middleware de errores

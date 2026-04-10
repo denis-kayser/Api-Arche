@@ -18,12 +18,19 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3       #usar caché
+
       - name: Build & Push imagen
         uses: docker/build-push-action@v5
         with:
           context: .
           push: true
-          tags: jsherrcode/api-arche:latest
+          tags: |
+            jsherrcode/api-arche:latest
+            # jsherrcode/api-arche:${{ github.sha }}
+          cache-from: type=registry,ref=jsherrcode/api-arche:buildcache  #Lee caché
+          cache-to: type=registry,ref=jsherrcode/api-arche:buildcache,mode=max  #Guarda caché
 
   deploy:
     needs: build-and-push
@@ -40,3 +47,4 @@ jobs:
             cd /home/api-arche
             docker compose pull
             docker compose up -d
+            docker image prune -f
