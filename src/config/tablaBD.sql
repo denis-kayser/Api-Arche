@@ -1,0 +1,14 @@
+
+CREATE TABLE AccessLogs (
+    AccessLogID BIGINT AUTO_INCREMENT PRIMARY KEY,
+
+    Payload TEXT NOT NULL,
+
+    IpAddress VARCHAR(45) NOT NULL,
+
+    Endpoint VARCHAR(100) NOT NULL,
+		
+    UserAgent TEXT NULL,
+
+    CreatedAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

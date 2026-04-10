@@ -1,0 +1,26 @@
+# Node.js / Next.js
+node_modules/
+.env
+.env.local
+.env.development
+.env.production
+.DS_Store
+.next/
+dist/
+build/
+
+# Prisma
+prisma/migrations/
+prisma/dev.db   # si usas SQLite local
+
+# Logs
+*.log
+logs/
+
+# OS
+Thumbs.db
+*.swp
+
+# Editor
+.vscode/
+.idea/
