@@ -26,12 +26,12 @@ export const signInController = {
 
       const result = await signInService.Credentials(data);
 
-      if (!result.ok) {
-        return response.error(
+      if (result.ok) {
+        return response.success(
           res,
-          ErrorCode.UNAUTHORIZED,
+          SuccessCode.SUCCESS,
           result.message || 'Credenciales inválidas',
-          401
+          200
         );
       }
 
@@ -72,12 +72,12 @@ export const signInController = {
 
       const result = await signInService.Google(data);
 
-      if (!result.ok) {
-        return response.error(
+      if (result.ok) {
+        return response.success(
           res,
-          ErrorCode.UNAUTHORIZED,
+          SuccessCode.SUCCESS,
           result.message || 'Credenciales inválidas',
-          401
+          200
         );
       }
 

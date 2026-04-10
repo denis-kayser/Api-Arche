@@ -3,7 +3,7 @@ import { SpResult, SpResultBasic } from "../../types/response/response";
 import { SignInGoogleProps, UserRegisterGoogleProps, UserRegisterProps } from "../../types/users/register";
 import bcrypt from "bcryptjs";
 import { UserSignIn } from "../../types/users/user";
-import { ErrorCode } from "../../constants/errorCodes";
+import { ErrorCode, ValidationErrorCode } from "../../constants/errorCodes";
 import { SuccessCode } from "../../constants/successCodes";
 
 // ====================================
@@ -29,8 +29,8 @@ export const signInModel = {
 
       if (result.rows.length === 0) {
         return {
-          ok: false,
-          code: ErrorCode.UNAUTHORIZED,
+          ok: true,
+          code: SuccessCode.SUCCESS,
           message: 'Usuario no encontrado',
           data: [],
         };
@@ -44,8 +44,8 @@ export const signInModel = {
 
       if (!isMatch) {
         return {
-          ok: false,
-          code: ErrorCode.UNAUTHORIZED,
+          ok: true,
+          code: ValidationErrorCode.INVALID_PASSWORD,
           message: 'Contraseña incorrecta',
           data: [],
         };
@@ -86,8 +86,8 @@ export const signInModel = {
 
       if (result.rows.length === 0) {
         return {
-          ok: false,
-          code: ErrorCode.UNAUTHORIZED,
+          ok: true,
+          code: SuccessCode.SUCCESS,
           message: 'Usuario no encontrado',
           data: [],
         };

@@ -1,11 +1,11 @@
-import { ErrorCode } from "../../constants/errorCodes";
+import { ErrorCode, ValidationErrorCode } from "../../constants/errorCodes";
 import { SuccessCode } from "../../constants/successCodes";
 
 
 export interface SpResult<T> {
   ok: boolean;
   message: string;
-  code?: ErrorCode | SuccessCode;
+  code?: ValidationErrorCode | ErrorCode | SuccessCode;
   data: T | null | [];
 }
 
