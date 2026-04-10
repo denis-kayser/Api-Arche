@@ -40,8 +40,6 @@ import { ErrorCode } from "../../constants/errorCodes";
 
 
 export const userController: ParamsType = async (req, res) => {
-
-  console.log({req});
   
   try {
     const { name, isActive, rolId } = req.query;

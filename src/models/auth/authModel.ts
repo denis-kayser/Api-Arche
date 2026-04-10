@@ -3,6 +3,8 @@ import { SpResult, SpResultBasic } from "../../types/response/response";
 import { UserRegisterGoogleProps, UserRegisterProps } from "../../types/users/register";
 import bcrypt from "bcryptjs";
 import { UserSignIn } from "../../types/users/user";
+import { ErrorCode } from "../../constants/errorCodes";
+import { SuccessCode } from "../../constants/successCodes";
 
 // ====================================
 // Inicia Sesión
@@ -20,25 +22,39 @@ export const signInModel = {
         AND "IS_ACTIVE" = true 
         AND "TYPE_AUTH" = 'CREDENTIALS' 
         `;
+
+
+
       const result = await pool.query(query, [email]);
 
-      const {PASSWORD,...user} = result.rows[0];
-
-      if (!user) {
-        throw new Error('Usuario no encontrado');
+      if (result.rows.length === 0) {
+        return {
+          ok: false,
+          code: ErrorCode.UNAUTHORIZED,
+          message: 'Usuario no encontrado',
+          data: [],
+        };
       }
+
+      const { PASSWORD, ...user } = result.rows[0];
+
 
       // Comparar contraseña ingresada con el hash almacenado
       const isMatch: boolean = await bcrypt.compare(password!, PASSWORD);
 
       if (!isMatch) {
-        throw new Error('Contraseña incorrecta');
+        return {
+          ok: false,
+          code: ErrorCode.UNAUTHORIZED,
+          message: 'Contraseña incorrecta',
+          data: [],
+        };
       }
-
       return {
         ok: true,
         message: 'Inicio de sesión exitoso',
-        data: user,
+        code: SuccessCode.SUCCESS,
+        data: user
       };
 
     } catch (error) {
@@ -97,14 +113,14 @@ export const signUpModel = {
 
       const salt = await bcrypt.genSalt(10);
       const hashedPassword = await bcrypt.hash(password!, salt);
- 
+
       const query = 'CALL sp_registerUser($1, $2, $3, $4, $5, $6, $7)';
       const values = [name, email, hashedPassword, rolID, 'HTTP://localhost:5173', null, 'CREDENTIALS'];
 
       const result = await pool.query(query, values);
 
       const response: SpResultBasic | undefined = result.rows[0];
-     
+
 
       return response
 

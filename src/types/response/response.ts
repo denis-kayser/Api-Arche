@@ -5,7 +5,8 @@ import { SuccessCode } from "../../constants/successCodes";
 export interface SpResult<T> {
   ok: boolean;
   message: string;
-  data: T;
+  code?: ErrorCode | SuccessCode;
+  data: T | null | [];
 }
 
 
@@ -19,5 +20,5 @@ export interface ApiResponse<T = any> {
   ok: boolean;
   code: SuccessCode | ErrorCode;
   message: string;
-  data: T;
+  data: T | [];
 }

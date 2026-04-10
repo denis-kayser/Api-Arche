@@ -26,7 +26,17 @@ export const signInController = {
 
       const result = await signInService.Credentials(data);
 
-      return response.success<UserSignIn>(
+      if (!result.ok) {
+        return response.error(
+          res,
+          ErrorCode.UNAUTHORIZED,
+          result.message || 'Credenciales inválidas',
+          401
+        );
+      }
+
+
+      return response.success(
         res,
         SuccessCode.SUCCESS,
         result.message || 'Usuario logueado correctamente',
@@ -46,7 +56,7 @@ export const signInController = {
 
   },
   Google: async (req: Request, res: Response) => {
-  try {
+    try {
       const { email, password } = req.body;
 
       if (!email || !password) {

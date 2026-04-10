@@ -31,7 +31,7 @@ export const response = {
       ok: false,
       code,
       message,
-      data: null,
+      data: [],
     };
 
     return res.status(status).json(body);

@@ -7,6 +7,7 @@ import pingRouter from './routers/pingRouter'
 import tokenRouter from './routers/token/tokenRouter'
 import authRouter from './routers/auth/authRouter'
 import userRouter from './routers/users/userRouter'
+import moduleRouter from './routers/module/moduleRouter'
 
 
 
@@ -21,7 +22,8 @@ app.use('/api/v1', authRouter); // autenticacion
 
 
 // Rutas privadas
-// app.use('/api/v1', authMiddleware) // verificar Token
+app.use('/api/v1', authMiddleware) // verificar Token
+app.use('/api/v1', moduleRouter); // modulos
 app.use('/api/v1', userRouter); // usuarios
 
 // Middleware de errores
