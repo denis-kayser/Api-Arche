@@ -12,3 +12,8 @@ export interface UserRegisterProps {
   password: string;
   rolID?: number;
 }
+
+export interface SignInGoogleProps {
+  email: string;
+  authID: string;
+}

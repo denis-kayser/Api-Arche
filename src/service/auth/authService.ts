@@ -1,4 +1,4 @@
-import { UserRegisterGoogleProps, UserRegisterProps } from "../../types/users/register";
+import { SignInGoogleProps, UserRegisterGoogleProps, UserRegisterProps } from "../../types/users/register";
 import { SpResult, SpResultBasic } from "../../types/response/response";
 import { signInModel, signUpModel } from "../../models/auth/authModel";
 import { UserSignIn } from "../../types/users/user";
@@ -23,7 +23,7 @@ export const signInService = {
       );
     }
   },
-  Google: async (data: UserRegisterProps): Promise<SpResultBasic> => {
+  Google: async (data: SignInGoogleProps): Promise<SpResult<UserSignIn>> => {
     try {
       const response = await signInModel.Google(data);
 

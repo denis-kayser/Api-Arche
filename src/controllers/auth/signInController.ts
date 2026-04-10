@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { UserRegisterProps } from "../../types/users/register"
+import { SignInGoogleProps, UserRegisterProps } from "../../types/users/register"
 import { ParamsType } from "../../types/express/express"
 import { response } from "../../util/response";
 import { SuccessCode } from "../../constants/successCodes";
@@ -57,9 +57,9 @@ export const signInController = {
   },
   Google: async (req: Request, res: Response) => {
     try {
-      const { email, password } = req.body;
+      const { email, authID } = req.body;
 
-      if (!email || !password) {
+      if (!email || !authID) {
         return response.error(
           res,
           ErrorCode.MISSING_PARAMS,
@@ -68,15 +68,24 @@ export const signInController = {
         );
       }
 
-      const data: UserRegisterProps = { email, password };
+      const data: SignInGoogleProps = { email, authID };
 
       const result = await signInService.Google(data);
+
+      if (!result.ok) {
+        return response.error(
+          res,
+          ErrorCode.UNAUTHORIZED,
+          result.message || 'Credenciales inválidas',
+          401
+        );
+      }
 
       return response.success(
         res,
         SuccessCode.SUCCESS,
         result.message || 'Usuario logueado correctamente',
-        null,
+        result.data,
         200
       );
 

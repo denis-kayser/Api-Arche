@@ -1,6 +1,6 @@
 import { pool } from "../../config/conexion";
 import { SpResult, SpResultBasic } from "../../types/response/response";
-import { UserRegisterGoogleProps, UserRegisterProps } from "../../types/users/register";
+import { SignInGoogleProps, UserRegisterGoogleProps, UserRegisterProps } from "../../types/users/register";
 import bcrypt from "bcryptjs";
 import { UserSignIn } from "../../types/users/user";
 import { ErrorCode } from "../../constants/errorCodes";
@@ -67,29 +67,40 @@ export const signInModel = {
       );
     }
   },
-  Google: async (data: UserRegisterProps): Promise<SpResultBasic> => {
+  Google: async (data: SignInGoogleProps): Promise<SpResult<UserSignIn>> => {
     try {
-      const { name, email, password, rolID } = data;
-
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password!, salt);
+      const { email, authID } = data;
 
 
-      const query = 'SELECT sp_registeruser($1, $2, $3, $4) AS result';
-      const values = [name, email, hashedPassword, rolID];
+      const query = `
+        SELECT "EMAIL", "AUTH_ID"
+        FROM "USERS"
+        WHERE "EMAIL" = $1 
+        AND "AUTH_ID" = $2 
+        AND "IS_ACTIVE" = true 
+        AND "TYPE_AUTH" = 'GOOGLE' 
+        `;
+      const values = [email, authID];
 
       const result = await pool.query(query, values);
 
-      const response: SpResultBasic | undefined = result.rows[0]?.result;
-
-      if (!response) {
-        throw new Error('Respuesta vacía del procedimiento');
+      if (result.rows.length === 0) {
+        return {
+          ok: false,
+          code: ErrorCode.UNAUTHORIZED,
+          message: 'Usuario no encontrado',
+          data: [],
+        };
       }
 
-      if (!response || !response.ok) {
-        throw new Error(response?.message || 'Error al registrar usuario');
-      }
-      return response
+      const { PASSWORD, ...user } = result.rows[0];
+
+      return {
+        ok: true,
+        message: 'Inicio de sesión exitoso',
+        code: SuccessCode.SUCCESS,
+        data: user
+      };
 
     } catch (error) {
       console.error('Error en postSignUpCredentialsModel:', error);
