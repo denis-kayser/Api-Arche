@@ -4,11 +4,11 @@ services:
     image: jsherrcode/api-arche:latest
     container_name: api-arche
     ports:
-      - "3000:3000"
+      - "5000:5000"
     env_file:
-      - .env                  # ← todas las variables sensibles vienen de acá
+      - .env
     environment:
-      NODE_ENV: production    # ← solo lo no sensible va acá
+      NODE_ENV: production
     networks:
       - shared_network
     restart: unless-stopped
