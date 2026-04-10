@@ -28,7 +28,6 @@ jobs:
           push: true
           tags: |
             jsherrcode/api-arche:latest
-            # jsherrcode/api-arche:${{ github.sha }}
           cache-from: type=registry,ref=jsherrcode/api-arche:buildcache  #Lee caché
           cache-to: type=registry,ref=jsherrcode/api-arche:buildcache,mode=max  #Guarda caché
 
