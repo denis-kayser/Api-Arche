@@ -1,0 +1,18 @@
+# docker-compose.yml
+services:
+  app:
+    image: jsherrcode/api-arche:latest
+    container_name: api-arche
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env                  # ← todas las variables sensibles vienen de acá
+    environment:
+      NODE_ENV: production    # ← solo lo no sensible va acá
+    networks:
+      - shared_network
+    restart: unless-stopped
+
+networks:
+  shared_network:
+    external: true
