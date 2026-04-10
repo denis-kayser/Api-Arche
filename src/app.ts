@@ -1,5 +1,5 @@
 import express from 'express'
-import { PORT } from './config/config'
+import { API_PORT } from './config/config'
 import { authMiddleware } from './middleware/middleware'
 import { errorHandler } from './middleware/errorHandler'
 
@@ -27,6 +27,6 @@ app.use('/api/v1', userRouter); // usuarios
 // Middleware de errores
 app.use(errorHandler)
 
-app.listen(PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${PORT}`);
+app.listen(API_PORT, () => {
+  console.log(`Servidor corriendo en http://localhost:${API_PORT}`);
 });
