@@ -2,27 +2,34 @@ import { pool } from "../../config/conexion";
 import { SpResult, SpResultBasic } from "../../types/response/response";
 import { UserRegisterGoogleProps, UserRegisterProps } from "../../types/users/register";
 import bcrypt from "bcryptjs";
+import { UserSignIn } from "../../types/users/user";
 
 // ====================================
 // Inicia Sesión
 // ====================================
 export const signInModel = {
-  Credentials: async (data: UserRegisterProps): Promise<SpResultBasic> => {
+  Credentials: async (data: UserRegisterProps): Promise<SpResult<UserSignIn>> => {
     try {
       const { email, password } = data;
 
       // Buscar usuario por email
-      const query = `SELECT "EMAIL", "PASSWORD" FROM "USERS" WHERE "EMAIL" = $1`;
+      const query = `
+        SELECT "ID", "NAME", "EMAIL", "PASSWORD", "IMAGE_URL" 
+        FROM "USERS" 
+        WHERE "EMAIL" = $1 
+        AND "IS_ACTIVE" = true 
+        AND "TYPE_AUTH" = 'CREDENTIALS' 
+        `;
       const result = await pool.query(query, [email]);
 
-      const user = result.rows[0];
+      const {PASSWORD,...user} = result.rows[0];
 
       if (!user) {
         throw new Error('Usuario no encontrado');
       }
 
       // Comparar contraseña ingresada con el hash almacenado
-      const isMatch: boolean = await bcrypt.compare(password!, user.PASSWORD);
+      const isMatch: boolean = await bcrypt.compare(password!, PASSWORD);
 
       if (!isMatch) {
         throw new Error('Contraseña incorrecta');
@@ -31,6 +38,7 @@ export const signInModel = {
       return {
         ok: true,
         message: 'Inicio de sesión exitoso',
+        data: user,
       };
 
     } catch (error) {

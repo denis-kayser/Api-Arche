@@ -5,6 +5,7 @@ import { response } from "../../util/response";
 import { SuccessCode } from "../../constants/successCodes";
 import { ErrorCode } from "../../constants/errorCodes";
 import { signInService } from "../../service/auth/authService";
+import { UserSignIn } from "../../types/users/user";
 
 
 export const signInController = {
@@ -25,11 +26,11 @@ export const signInController = {
 
       const result = await signInService.Credentials(data);
 
-      return response.success(
+      return response.success<UserSignIn>(
         res,
         SuccessCode.SUCCESS,
         result.message || 'Usuario logueado correctamente',
-        null,
+        result.data,
         200
       );
 

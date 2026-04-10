@@ -1,12 +1,13 @@
 import { UserRegisterGoogleProps, UserRegisterProps } from "../../types/users/register";
-import { SpResultBasic } from "../../types/response/response";
+import { SpResult, SpResultBasic } from "../../types/response/response";
 import { signInModel, signUpModel } from "../../models/auth/authModel";
+import { UserSignIn } from "../../types/users/user";
 
 // =======================================
 // Inicia Sesión
 // =======================================
 export const signInService = {
-  Credentials: async (data: UserRegisterProps): Promise<SpResultBasic> => {
+  Credentials: async (data: UserRegisterProps): Promise<SpResult<UserSignIn>> => {
     try {
       const response = await signInModel.Credentials(data);
 
