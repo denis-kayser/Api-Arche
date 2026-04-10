@@ -1,8 +1,8 @@
 import { pool } from "../../config/conexion";
 import { SpResult, SpResultBasic } from "../../types/response/response";
-import { SignInGoogleProps, UserRegisterGoogleProps, UserRegisterProps } from "../../types/users/register";
+import { UserRegisterGoogleProps, UserRegisterProps } from "../../types/users/register";
 import bcrypt from "bcryptjs";
-import { UserSignIn } from "../../types/users/user";
+import { UserSignIn, UserSignInGoogle, UserSignInGoogleResponse } from "../../types/users/user";
 import { ErrorCode, ValidationErrorCode } from "../../constants/errorCodes";
 import { SuccessCode } from "../../constants/successCodes";
 
@@ -22,8 +22,6 @@ export const signInModel = {
         AND "IS_ACTIVE" = true 
         AND "TYPE_AUTH" = 'CREDENTIALS' 
         `;
-
-
 
       const result = await pool.query(query, [email]);
 
@@ -67,13 +65,13 @@ export const signInModel = {
       );
     }
   },
-  Google: async (data: SignInGoogleProps): Promise<SpResult<UserSignIn>> => {
+  Google: async (data: UserSignInGoogle): Promise<UserSignInGoogleResponse> => {
     try {
       const { email, authID } = data;
 
 
       const query = `
-        SELECT "EMAIL", "AUTH_ID"
+        SELECT "ID" as id, "NAME" as name, "EMAIL" as email, "IMAGE_URL" as imageUrl, "TYPE_AUTH" as typeAuth
         FROM "USERS"
         WHERE "EMAIL" = $1 
         AND "AUTH_ID" = $2 
@@ -84,32 +82,13 @@ export const signInModel = {
 
       const result = await pool.query(query, values);
 
-      if (result.rows.length === 0) {
-        return {
-          ok: true,
-          code: SuccessCode.SUCCESS,
-          message: 'Usuario no encontrado',
-          data: [],
-        };
-      }
+      const user = result.rows[0];
+      return user
 
-      const { PASSWORD, ...user } = result.rows[0];
-
-      return {
-        ok: true,
-        message: 'Inicio de sesión exitoso',
-        code: SuccessCode.SUCCESS,
-        data: user
-      };
-
-    } catch (error) {
-      console.error('Error en postSignUpCredentialsModel:', error);
-
-      throw new Error(
-        error instanceof Error
-          ? error.message
-          : 'Error al registrar usuario'
-      );
+    } catch (error: unknown) {
+      console.error('Error en signInModel.Google:', error);
+      const message = error instanceof Error ? error.message : 'Error desconocido';
+      throw new Error(message);
     }
   }
 }

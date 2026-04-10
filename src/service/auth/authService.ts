@@ -1,7 +1,10 @@
-import { SignInGoogleProps, UserRegisterGoogleProps, UserRegisterProps } from "../../types/users/register";
+import { UserRegisterGoogleProps, UserRegisterProps } from "../../types/users/register";
 import { SpResult, SpResultBasic } from "../../types/response/response";
 import { signInModel, signUpModel } from "../../models/auth/authModel";
-import { UserSignIn } from "../../types/users/user";
+import { UserSignIn, UserSignInGoogle, UserSignInGoogleResponse } from "../../types/users/user";
+import { SuccessCode } from "../../constants/successCodes";
+import { ValidationErrorCode } from "../../constants/errorCodes";
+import { getErrorMessage } from "../../util/errors";
 
 // =======================================
 // Inicia Sesión
@@ -23,23 +26,37 @@ export const signInService = {
       );
     }
   },
-  Google: async (data: SignInGoogleProps): Promise<SpResult<UserSignIn>> => {
+  Google: async (data: UserSignInGoogle): Promise<UserSignInGoogleResponse> => {
     try {
-      const response = await signInModel.Google(data);
 
-      return response
+      const { email, authID } = data;
 
-    } catch (error) {
-      console.error('Service Error:', error);
+      if (!email || !email.includes('@')) {
+        throw new Error('El email no es válido');
+      }
 
-      throw new Error(
-        error instanceof Error
-          ? error.message
-          : 'Error al registrar usuario'
-      );
+      if (!authID || authID.trim().length === 0) {
+        throw new Error('El authID es requerido');
+      }
+
+      if (!email || !authID) {
+        throw new Error('Email y authID son requeridos');
+      }
+
+      const user = await signInModel.Google(data);
+
+      if (!user) {
+        throw new Error('usuario no encontrado');
+      }
+
+      return user
+    } catch (error: unknown) {
+      const message = getErrorMessage(error);
+      throw new Error(message);
     }
   }
 }
+
 
 
 // =======================================

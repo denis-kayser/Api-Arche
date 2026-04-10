@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
-import { SignInGoogleProps, UserRegisterProps } from "../../types/users/register"
+import { UserRegisterProps } from "../../types/users/register"
 import { ParamsType } from "../../types/express/express"
 import { response } from "../../util/response";
 import { SuccessCode } from "../../constants/successCodes";
-import { ErrorCode } from "../../constants/errorCodes";
+import { ErrorCode, ValidationErrorCode } from "../../constants/errorCodes";
 import { signInService } from "../../service/auth/authService";
-import { UserSignIn } from "../../types/users/user";
+import { UserSignIn, UserSignInGoogle } from "../../types/users/user";
 
 
 export const signInController = {
@@ -27,11 +27,11 @@ export const signInController = {
       const result = await signInService.Credentials(data);
 
       if (result.ok) {
-        return response.success(
+        return response.error(
           res,
-          SuccessCode.SUCCESS,
+          ErrorCode.UNAUTHORIZED,
           result.message || 'Credenciales inválidas',
-          200
+          401
         );
       }
 
@@ -68,24 +68,29 @@ export const signInController = {
         );
       }
 
-      const data: SignInGoogleProps = { email, authID };
-
-      const result = await signInService.Google(data);
-
-      if (result.ok) {
-        return response.success(
+      if (!email.includes('@')) {
+        return response.error(
           res,
-          SuccessCode.SUCCESS,
-          result.message || 'Credenciales inválidas',
-          200
+          ValidationErrorCode.INVALID_EMAIL,
+          'El email no es válido',
+          400
         );
       }
+
+      const user: UserSignInGoogle = { email, authID };
+
+      // servicio para verificar usuario
+      const result = await signInService.Google(user);
+
+      console.log(result);
+      
+
 
       return response.success(
         res,
         SuccessCode.SUCCESS,
-        result.message || 'Usuario logueado correctamente',
-        result.data,
+        'Usuario logueado correctamente',
+        result,
         200
       );
 

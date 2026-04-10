@@ -6,7 +6,7 @@ export interface SpResult<T> {
   ok: boolean;
   message: string;
   code?: ValidationErrorCode | ErrorCode | SuccessCode;
-  data: T | null | [];
+  data: T | [];
 }
 
 
@@ -18,7 +18,7 @@ export type SpResultBasic = {
 
 export interface ApiResponse<T = any> {
   ok: boolean;
-  code: SuccessCode | ErrorCode;
+  code: SuccessCode | ErrorCode | ValidationErrorCode;
   message: string;
   data: T | [];
 }
