@@ -1,47 +1,32 @@
 import { Request, Response } from "express";
-import { UserRegisterProps } from "../../types/users/register"
-import { ParamsType } from "../../types/express/express"
 import { response } from "../../util/response";
-import { SuccessCode } from "../../constants/successCodes";
 import { ErrorCode } from "../../constants/errorCodes";
-import { signInService } from "../../service/auth/authService";
-import { UserSignIn } from "../../types/users/user";
+import { moduleService } from "../../service/module/moduleService";
 
 
 
-export const moduleController = async (req: Request, res: Response) => {
-  try {
-    const { email, password } = req.body;
+export const moduleController = {
+  getAllModule: async (req: Request, res: Response) => {
+    try {
+      const result = await moduleService.getAllModule();
 
-    if (!email || !password) {
+
+      return res.status(200).json({
+        ok: result.ok,
+        code: result.code,
+        message: result.message || 'Módulos obtenidos correctamente',
+        data: result.data
+      })
+
+    } catch (error) {
+      console.error('Controller Error:', error);
+
       return response.error(
         res,
-        ErrorCode.MISSING_PARAMS,
-        'Todos los campos son requeridos',
-        400
+        ErrorCode.INTERNAL_ERROR,
+        error instanceof Error ? error.message : 'Error al obtener los módulos'
       );
     }
 
-    const data: UserRegisterProps = { email, password };
-
-    const result = await signInService.Credentials(data);
-
-    return response.success(
-      res,
-      SuccessCode.SUCCESS,
-      result.message || 'Usuario logueado correctamente',
-      result.data,
-      200
-    );
-
-  } catch (error) {
-    console.error('Controller Error:', error);
-
-    return response.error(
-      res,
-      ErrorCode.INTERNAL_ERROR,
-      error instanceof Error ? error.message : 'Error al iniciar sesión'
-    );
   }
-
 }
