@@ -40,7 +40,7 @@ export const tokenController = (req: Request, res: Response) => {
       message: "Autenticación exitosa",
       data: {
         access_token: token,
-        token_type: "Bearer",
+        // token_type: "Bearer",
         expires_in: formattedDate
         // expires_in: expiresAt.toLocaleDateString('es-PE') + ' ' + expiresAt.toLocaleTimeString('es-PE'),
         // iso: expiresAt.toISOString(),                      // "2026-04-09T16:25:28.000Z"
