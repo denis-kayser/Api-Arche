@@ -1,6 +1,34 @@
-GET http://localhost:3000/api/v1/ping
+@API_URL = http://localhost:5000
+
+### prueba
+GET http://localhost:5000/api/v1/ping
+Accept: application/json
+
+#### prueba token
+GET http://localhost:5000/api/v1/auth/token?name=nulln&isActive=null&rolId=null
 Accept: application/json
 
 
-GET http://localhost:3000/api/v1/auth/token?name=nulln&isActive=null&rolId=null
-Accept: application/json
+# ====================================================
+### probar token
+# {{API_URL}}/auth/token
+# Content-Type: application/json
+
+
+#### prueba sign-in-google
+POST {{API_URL}}/api/v1/auth/sign-in-google
+Content-Type: application/json
+
+{
+  "email": "aasa@kayser.pe",
+  "authID": "aaaaddddasjssssfjsdñad"
+}
+
+#### prueba sign-in-credentials
+POST {{API_URL}}/api/v1/auth/sign-in-credentials
+Content-Type: application/json
+
+{
+  "email": "aaaa@gmail.com",
+  "password": "1234"
+}

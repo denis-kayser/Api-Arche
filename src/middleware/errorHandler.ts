@@ -20,7 +20,9 @@ export const errorHandler: ErrorMiddlewareType = (error, req, res, next) => {
   const isConnectionError =
     code === 'ECONNREFUSED' ||
     code === 'ENOTFOUND' ||
-    message.includes('Connection terminated')
+    message.includes('Connection terminated') ||
+    message.includes('DB_HOST') ||
+    message.includes('No se ha proporcionado DB_HOST')
 
   if (isConnectionError) {
     return res.status(503).json({

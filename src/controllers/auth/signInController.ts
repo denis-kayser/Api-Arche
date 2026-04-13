@@ -25,7 +25,7 @@ export const signInController = {
       const data: UserRegisterProps = { email, password };
 
       const result = await signInService.Credentials(data);
-  
+
 
       return res.status(200).json({
         ok: result.ok,
@@ -88,10 +88,24 @@ export const signInController = {
     } catch (error) {
       console.error('Controller Error:', error);
 
+      const message = error instanceof Error ? error.message : 'Error al iniciar sesión';
+      const isConnectionError =
+        message.includes('DB_HOST') ||
+        message.includes('No se ha proporcionado DB_HOST');
+
+      if (isConnectionError) {
+        return response.error(
+          res,
+          ErrorCode.INTERNAL_ERROR,
+          'No se puede conectar al servidor de base de datos',
+          503
+        );
+      }
+
       return response.error(
         res,
         ErrorCode.INTERNAL_ERROR,
-        error instanceof Error ? error.message : 'Error al iniciar sesión'
+        message
       );
     }
   }
