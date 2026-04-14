@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from '../../config/config';
+import { formatInTimeZone } from 'date-fns-tz';
 
 export const tokenController = (req: Request, res: Response) => {
   try {
@@ -28,17 +29,23 @@ export const tokenController = (req: Request, res: Response) => {
 
     const expiresAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
 
+    const formattedDate = formatInTimeZone(
+      expiresAt,
+      "America/Lima",
+      "yyyy-MM-dd HH:mm:ss"
+    );
+
     return res.json({
       ok: true,
       message: "Autenticación exitosa",
       data: {
         access_token: token,
-        token_type: "Bearer",
-        expires_in: {
-          expires_in: expiresAt.toLocaleDateString('es-PE') + ' ' + expiresAt.toLocaleTimeString('es-PE'),
-          iso: expiresAt.toISOString(),                      // "2026-04-09T16:25:28.000Z"
-          // seconds: 7200                                      // 2 horas en segundos
-        }
+        // token_type: "Bearer",
+        expires_in: formattedDate
+        // expires_in: expiresAt.toLocaleDateString('es-PE') + ' ' + expiresAt.toLocaleTimeString('es-PE'),
+        // iso: expiresAt.toISOString(),                      // "2026-04-09T16:25:28.000Z"
+        // seconds: 7200                                      // 2 horas en segundos
+        // }
       }
     });
 

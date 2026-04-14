@@ -1,10 +1,10 @@
 import { pool } from "../../config/conexion";
+import bcrypt from "bcryptjs";
 import { SpResult, SpResultBasic } from "../../types/response/response";
 import { UserRegisterGoogleProps, UserRegisterProps } from "../../types/users/register";
-import bcrypt from "bcryptjs";
 import { UserSignIn, UserSignInGoogle, UserSignInGoogleResponse } from "../../types/users/user";
-import { ErrorCode, ValidationErrorCode } from "../../constants/errorCodes";
 import { SuccessCode } from "../../constants/successCodes";
+import { ErrorCode } from "../../constants/errorCodes";
 
 // ====================================
 // Inicia Sesión
@@ -28,7 +28,7 @@ export const signInModel = {
       if (result.rows.length === 0) {
         return {
           ok: false,
-          code: ValidationErrorCode.INVALID_EMAIL,
+          code: ErrorCode.INVALID_EMAIL,
           message: 'Usuario no encontrado',
           data: [],
         };
@@ -43,7 +43,7 @@ export const signInModel = {
       if (!isMatch) {
         return {
           ok: false,
-          code: ValidationErrorCode.INVALID_PASSWORD,
+          code: ErrorCode.INVALID_PASSWORD,
           message: 'Contraseña incorrecta',
           data: [],
         };

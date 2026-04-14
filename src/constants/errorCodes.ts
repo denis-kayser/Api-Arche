@@ -1,8 +1,8 @@
+export enum ErrorCode {
 
-/**
- * Códigos de error - Autenticación y Autorización (4xx)
- */
-export enum AuthErrorCode {
+  // ===================================
+  // Códigos de error - Autenticación y Autorización (4xx)
+  // ===================================
   MISSING_TOKEN = 'MISSING_TOKEN',
   INVALID_TOKEN = 'INVALID_TOKEN',
   EXPIRED_TOKEN = 'EXPIRED_TOKEN',
@@ -12,26 +12,27 @@ export enum AuthErrorCode {
   ACCOUNT_LOCKED = 'ACCOUNT_LOCKED',
   ACCOUNT_INACTIVE = 'ACCOUNT_INACTIVE',
   ACCESS_DENIED = 'ACCESS_DENIED',
-  ROLE_REQUIRED = 'ROLE_REQUIRED'
-}
+  ROLE_REQUIRED = 'ROLE_REQUIRED',
 
-/**
- * Códigos de error - Recursos (4xx)
- */
-export enum ResourceErrorCode {
+
+
+
+  // ===================================
+  // Códigos de error - Recursos (4xx)
+  // ===================================
   RESOURCE_NOT_FOUND = 'RESOURCE_NOT_FOUND',
   USER_NOT_FOUND = 'USER_NOT_FOUND',
   PRODUCT_NOT_FOUND = 'PRODUCT_NOT_FOUND',
   ORDER_NOT_FOUND = 'ORDER_NOT_FOUND',
   DUPLICATE_ENTRY = 'DUPLICATE_ENTRY',
   DUPLICATE_EMAIL = 'DUPLICATE_EMAIL',
-  DUPLICATE_USERNAME = 'DUPLICATE_USERNAME'
-}
+  DUPLICATE_USERNAME = 'DUPLICATE_USERNAME',
 
-/**
- * Códigos de error - Validación (4xx)
- */
-export enum ValidationErrorCode {
+
+
+  //  ===============================
+  //  Códigos de error - Validación (4xx)
+  //  ===============================
   VALIDATION_ERROR = 'VALIDATION_ERROR',
   MISSING_FIELD = 'MISSING_FIELD',
   INVALID_FORMAT = 'INVALID_FORMAT',
@@ -43,37 +44,40 @@ export enum ValidationErrorCode {
   INVALID_URL = 'INVALID_URL',
   FIELD_TOO_SHORT = 'FIELD_TOO_SHORT',
   FIELD_TOO_LONG = 'FIELD_TOO_LONG',
-  VALUE_OUT_OF_RANGE = 'VALUE_OUT_OF_RANGE'
-}
+  VALUE_OUT_OF_RANGE = 'VALUE_OUT_OF_RANGE',
 
-/**
- * Códigos de error - Petición (4xx)
- */
-export enum RequestErrorCode {
+
+
+  //  ===============================
+  //  Códigos de error - Petición (4xx)
+  //  ===============================
   BAD_REQUEST = 'BAD_REQUEST',
   INVALID_JSON = 'INVALID_JSON',
   UNSUPPORTED_MEDIA = 'UNSUPPORTED_MEDIA',
-  METHOD_NOT_ALLOWED = 'METHOD_NOT_ALLOWED'
-}
+  METHOD_NOT_ALLOWED = 'METHOD_NOT_ALLOWED',
 
-/**
- * Códigos de error - Límites (4xx)
- */
-export enum LimitErrorCode {
+
+
+  // ================================
+  // Códigos de error - Límites (4xx)
+  // ================================
   RATE_LIMIT_EXCEEDED = 'RATE_LIMIT_EXCEEDED',
   QUOTA_EXCEEDED = 'QUOTA_EXCEEDED',
   FILE_TOO_LARGE = 'FILE_TOO_LARGE',
-  MAX_RETRIES_EXCEEDED = 'MAX_RETRIES_EXCEEDED'
-}
+  MAX_RETRIES_EXCEEDED = 'MAX_RETRIES_EXCEEDED',
+  INVALID_FILE_TYPE = 'INVALID_FILE_TYPE',
 
-/**
- * Códigos de error - Servidor (5xx)
- */
-export enum ServerErrorCode {
+
+
+  // =======================
+  // Códigos de error - Servidor (5xx)
+  // =======================
   SERVER_ERROR = 'SERVER_ERROR',
   DATABASE_ERROR = 'DATABASE_ERROR',
   DATABASE_TIMEOUT = 'DATABASE_TIMEOUT',
-  CONNECTION_ERROR = 'CONNECTION_ERROR',
+  DATABASE_CONNECTION_ERROR = 'DATABASE_CONNECTION_ERROR',
+  DATABASE_SYNTAX_ERROR = 'DATABASE_SYNTAX_ERROR',
+  DATABASE_UNKNOWN_ERROR = 'DATABASE_UNKNOWN_ERROR',
   REDIS_ERROR = 'REDIS_ERROR',
   QUEUE_ERROR = 'QUEUE_ERROR',
   EXTERNAL_API_ERROR = 'EXTERNAL_API_ERROR',
@@ -83,29 +87,28 @@ export enum ServerErrorCode {
   DOWNLOAD_FAILED = 'DOWNLOAD_FAILED',
   SERVICE_UNAVAILABLE = 'SERVICE_UNAVAILABLE',
   DB_ERROR = 'DB_ERROR',
-}
 
-/**
- * Códigos especiales
- */
-export enum SpecialCode {
+
+
+  // =======================
+  // Códigos especiales
+  // =======================
   PENDING = 'PENDING',
   PROCESSING = 'PROCESSING',
   RETRY_LATER = 'RETRY_LATER',
-  CONFLICT = 'CONFLICT',
   ALREADY_PROCESSED = 'ALREADY_PROCESSED',
   OPERATION_CANCELLED = 'OPERATION_CANCELLED',
-  MAINTENANCE_MODE = 'MAINTENANCE_MODE'
-}
+  MAINTENANCE_MODE = 'MAINTENANCE_MODE',
 
 
 
-export enum ErrorCode {
+  // =======================
   // Genéricos
+  // =======================
   INTERNAL_ERROR = 'INTERNAL_ERROR',
   UNKNOWN_ERROR = 'UNKNOWN_ERROR',
 
-  // Cliente
+  // Parametros
   MISSING_PARAMS = 'MISSING_PARAMS',
 
   // Auth
@@ -116,8 +119,4 @@ export enum ErrorCode {
   NOT_FOUND = 'NOT_FOUND',
   ALREADY_EXISTS = 'ALREADY_EXISTS',
   CONFLICT = 'CONFLICT',
-
-  // Archivos
-  FILE_TOO_LARGE = 'FILE_TOO_LARGE',
-  INVALID_FILE_TYPE = 'INVALID_FILE_TYPE',
 }

@@ -1,6 +1,6 @@
 import { config } from 'dotenv'
 
-config()
+config({ quiet: true })
 
 export const API_PORT: number = Number(process.env.API_PORT) || 5000
 

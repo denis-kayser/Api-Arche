@@ -1,6 +1,51 @@
-GET http://localhost:3000/api/v1/ping
+
+### ================================
+### variables
+### ================================
+@API_URL = http://localhost:5000
+@TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzYxMjg5MDIsImV4cCI6MTc3NjEzNjEwMiwiYXVkIjoiZXh0ZXJuYWwtc2VydmljZXMiLCJpc3MiOiJBcmNoZS1hcGkifQ.xfFwDr6tXmQVBrJll9ICU-WCcM8czqYOaMaGLaKKNrY
+### ================================
+
+
+
+### prueba
+GET http://localhost:5000/api/v1/ping
+Accept: application/json
+
+#### prueba token
+GET http://localhost:5000/api/v1/auth/token?name=nulln&isActive=null&rolId=null
 Accept: application/json
 
 
-GET http://localhost:3000/api/v1/auth/token?name=nulln&isActive=null&rolId=null
+# ==============================================================================
+# ====================================================
+### probar token
+POST {{API_URL}}/api/v1/auth/token
+
+#### prueba sign-in-google
+POST {{API_URL}}/api/v1/auth/sign-in-google
+Content-Type: application/json
+
+{
+  "email": "aasa@kayser.pe",
+  "authID": "aaaaddddasjssssfjsdñad"
+}
+
+#### prueba sign-in-credentials
+POST {{API_URL}}/api/v1/auth/sign-in-credentials
+Content-Type: application/json
+
+{
+  "email": "aaaa@gmail.com",
+  "password": "1234"
+}
+
+# ==============================================================================
+# ==============================================================================
+#Se necesita TOKEN para acceder a los modulos
+### prueba modulos
+GET {{API_URL}}/api/v1/modules
 Accept: application/json
+Authorization: Bearer {{TOKEN}}
+
+

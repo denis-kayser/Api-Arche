@@ -1,11 +1,11 @@
-import { ErrorCode, ValidationErrorCode } from "../../constants/errorCodes";
+import { ErrorCode } from "../../constants/errorCodes";
 import { SuccessCode } from "../../constants/successCodes";
 
 
 export interface SpResult<T> {
   ok: boolean;
   message: string;
-  code?: ValidationErrorCode | ErrorCode | SuccessCode;
+  code?: ErrorCode | SuccessCode;
   data: T | [];
 }
 
@@ -16,9 +16,15 @@ export type SpResultBasic = {
 };
 
 
+export type SpResultPayload<T = any> = {
+  ok: boolean;
+  data: T | [];
+};
+
+
 export interface ApiResponse<T = any> {
   ok: boolean;
-  code: SuccessCode | ErrorCode | ValidationErrorCode;
+  code: SuccessCode | ErrorCode;
   message: string;
   data: T | [];
 }
