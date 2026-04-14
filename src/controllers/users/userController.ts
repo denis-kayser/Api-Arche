@@ -1,10 +1,12 @@
-
+// src/controllers/users/userController.ts
+import { NextFunction, Request, Response } from "express";
 import { UserFilters } from "../../types/users/user"
 import { getUserService } from "../../service/users/userService"
 import { ParamsType } from "../../types/express/express"
 import { response } from "../../util/response";
 import { SuccessCode } from "../../constants/successCodes";
 import { ErrorCode } from "../../constants/errorCodes";
+import { disconnectAllSessions } from "../../service/socket/socketService";
 
 
 // export const userController: ParamsType = async (req, res) => {
@@ -40,7 +42,7 @@ import { ErrorCode } from "../../constants/errorCodes";
 
 
 export const userController: ParamsType = async (req, res) => {
-  
+
   try {
     const { name, isActive, rolId } = req.query;
 
@@ -81,10 +83,20 @@ export const userController: ParamsType = async (req, res) => {
 };
 
 
+export const logoutAllDevices = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { userId } = req.params
 
+    disconnectAllSessions(userId)
 
-
-
+    return res.status(200).json({
+      ok: true,
+      message: 'Sesiones cerradas correctamente'
+    })
+  } catch (error) {
+    next(error)
+  }
+}
 
 
 // export const registerController: ParamsType = async (req, res) => {

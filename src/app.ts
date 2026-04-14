@@ -1,3 +1,4 @@
+// src/app.ts
 import express from 'express'
 import { API_PORT } from './config/config'
 import { authMiddleware } from './middleware/middleware'
@@ -8,7 +9,6 @@ import tokenRouter from './routers/token/tokenRouter'
 import authRouter from './routers/auth/authRouter'
 import userRouter from './routers/users/userRouter'
 import moduleRouter from './routers/module/moduleRouter'
-
 
 
 const app = express()
@@ -29,6 +29,4 @@ app.use('/api/v1', userRouter); // usuarios
 // Middleware de errores
 app.use(errorHandler)
 
-app.listen(API_PORT, () => {
-  console.log(`Servidor corriendo en http://localhost:${API_PORT}`);
-});
+export default app;
