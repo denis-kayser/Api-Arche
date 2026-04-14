@@ -87,7 +87,7 @@ export const logoutAllDevices = async (req: Request, res: Response, next: NextFu
   try {
     const { userId } = req.params
 
-    disconnectAllSessions(userId)
+    disconnectAllSessions(userId as string)
 
     return res.status(200).json({
       ok: true,
