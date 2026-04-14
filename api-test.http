@@ -3,7 +3,7 @@
 ### variables
 ### ================================
 @API_URL = http://localhost:5000
-@TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzYwOTM1NjYsImV4cCI6MTc3NjEwMDc2NiwiYXVkIjoiZXh0ZXJuYWwtc2VydmljZXMiLCJpc3MiOiJBcmNoZS1hcGkifQ.rFGBW8lp0oKq6L3UyLjSozc2W8n7hf8TOaZ5OPQEhT
+@TOKEN = eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzYxMjg5MDIsImV4cCI6MTc3NjEzNjEwMiwiYXVkIjoiZXh0ZXJuYWwtc2VydmljZXMiLCJpc3MiOiJBcmNoZS1hcGkifQ.xfFwDr6tXmQVBrJll9ICU-WCcM8czqYOaMaGLaKKNrY
 ### ================================
 
 
@@ -46,4 +46,6 @@ Content-Type: application/json
 ### prueba modulos
 GET {{API_URL}}/api/v1/modules
 Accept: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzYwOTM4NTgsImV4cCI6MTc3NjEwMTA1OCwiYXVkIjoiZXh0ZXJuYWwtc2VydmljZXMiLCJpc3MiOiJBcmNoZS1hcGkifQ.ZkdU8xr0OFa0CzGrjy-i3b1AUHDEtG7pPjT0YHNrDLE
+Authorization: Bearer {{TOKEN}}
+
+
