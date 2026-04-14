@@ -19,7 +19,7 @@ COPY --from=builder /app/node_modules ./node_modules
 COPY package*.json ./
 
 EXPOSE 5000
-CMD ["node", "dist/app.js"]
+CMD ["node", "dist/server.js"]
 
 
 # # Stage 1: build
