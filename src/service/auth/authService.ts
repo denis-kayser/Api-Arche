@@ -3,7 +3,7 @@ import { SpResult, SpResultBasic } from "../../types/response/response";
 import { signInModel, signUpModel } from "../../models/auth/authModel";
 import { UserSignIn, UserSignInGoogle, UserSignInGoogleResponse } from "../../types/users/user";
 import { SuccessCode } from "../../constants/successCodes";
-import { ValidationErrorCode } from "../../constants/errorCodes";
+import { ErrorCode } from "../../constants/errorCodes";
 import { getErrorMessage } from "../../util/errors";
 
 // =======================================

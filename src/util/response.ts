@@ -1,5 +1,5 @@
 import { Response } from 'express';
-import { ErrorCode, ValidationErrorCode } from "../constants/errorCodes";
+import { ErrorCode } from "../constants/errorCodes";
 import { SuccessCode } from "../constants/successCodes";
 import { ApiResponse } from '../types/response/response';
 
@@ -23,7 +23,7 @@ export const response = {
 
   error: (
     res: Response,
-    code: ErrorCode | ValidationErrorCode,
+    code: ErrorCode,
     message: string,
     status: number = 500
   ) => {

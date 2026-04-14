@@ -3,9 +3,10 @@ import { UserRegisterProps } from "../../types/users/register"
 import { ParamsType } from "../../types/express/express"
 import { response } from "../../util/response";
 import { SuccessCode } from "../../constants/successCodes";
-import { ErrorCode, ValidationErrorCode } from "../../constants/errorCodes";
+import { ErrorCode } from "../../constants/errorCodes";
 import { signInService } from "../../service/auth/authService";
-import { UserSignIn, UserSignInGoogle } from "../../types/users/user";
+import { isDatabaseError } from '../../util/errors';
+import { UserSignInGoogle } from "../../types/users/user";
 
 
 export const signInController = {
@@ -62,7 +63,7 @@ export const signInController = {
       if (!email.includes('@')) {
         return response.error(
           res,
-          ValidationErrorCode.INVALID_EMAIL,
+          ErrorCode.INVALID_EMAIL,
           'El email no es válido',
           400
         );
@@ -89,14 +90,10 @@ export const signInController = {
       console.error('Controller Error:', error);
 
       const message = error instanceof Error ? error.message : 'Error al iniciar sesión';
-      const isConnectionError =
-        message.includes('DB_HOST') ||
-        message.includes('No se ha proporcionado DB_HOST');
-
-      if (isConnectionError) {
+      if (isDatabaseError(error)) {
         return response.error(
           res,
-          ErrorCode.INTERNAL_ERROR,
+          ErrorCode.DATABASE_ERROR,
           'No se puede conectar al servidor de base de datos',
           503
         );

@@ -7,9 +7,16 @@ import {
   DB_NAME
 } from './config'
 
-const dbHostMissingError = new Error(
-  'No se ha proporcionado DB_HOST. No se puede conectar a la base de datos.'
-)
+const missingDbVars: string[] = []
+export const DB_CONNECTION_ERROR_MESSAGE = 'No se puede conectar a la base de datos'
+
+if (!DB_HOST) missingDbVars.push('DB_HOST')
+if (!DB_PASSWORD) missingDbVars.push('DB_PASSWORD')
+
+
+const dbErrorMessage = missingDbVars.length
+  ? DB_CONNECTION_ERROR_MESSAGE
+  : ''
 
 const poolConfig = {
   host: DB_HOST,
@@ -29,11 +36,11 @@ type DbPool =
     query: (text: string, values?: any[]) => Promise<QueryResult>
   }
 
-export const pool: DbPool = DB_HOST
+export const pool: DbPool = missingDbVars.length === 0
   ? new Pool(poolConfig)
   : {
     query: async (): Promise<QueryResult> => {
-      throw dbHostMissingError
+      throw new Error(dbErrorMessage)
     },
   }
 
@@ -42,5 +49,7 @@ if ('on' in pool && typeof pool.on === 'function') {
     console.error('BD desconectada:', err.message)
   })
 } else {
-  console.error('ERROR DE CONFIGURACIÓN: falta DB_HOST. Las consultas a la base de datos devolverán un error de conexión.')
+  console.error(
+    `ERROR DE CONFIGURACIÓN: faltan parámetros de la base de datos: ${missingDbVars .join(', ')}. Las consultas a la base de datos devolverán un error de conexión.`
+  )
 }
