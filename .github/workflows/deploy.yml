@@ -21,6 +21,30 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3       #usar caché
 
+      - name: Get version tag
+        id: version
+        run: |
+          # Obtener token
+          TOKEN=$(curl -s -H "Content-Type: application/json" \
+            -X POST \
+            -d "{\"username\": \"${{ secrets.DOCKER_USERNAME }}\", \"password\": \"${{ secrets.DOCKER_PASSWORD }}\"}" \
+            https://hub.docker.com/v2/users/login/ | jq -r .token)
+
+          # Obtener el tag más reciente y sumar 1
+          LATEST=$(curl -s -H "Authorization: JWT $TOKEN" \
+            "https://hub.docker.com/v2/repositories/jsherrcode/api-arche/tags?page_size=100" \
+            | jq -r '.results[].name' | grep '^v1\.' | sort -rV | head -1)
+
+          if [ -z "$LATEST" ]; then
+            NEW_TAG="v1.1"
+          else
+            NUM=$(echo $LATEST | sed 's/v1\.//')
+            NEW_TAG="v1.$((NUM+1))"
+          fi
+
+          echo "new_tag=$NEW_TAG" >> $GITHUB_OUTPUT
+          echo "Nuevo tag: $NEW_TAG"
+
       - name: Build & Push imagen
         uses: docker/build-push-action@v5
         with:
@@ -28,6 +52,7 @@ jobs:
           push: true
           tags: |
             jsherrcode/api-arche:latest
+            jsherrcode/api-arche:${{ steps.version.outputs.new_tag }}
           cache-from: type=registry,ref=jsherrcode/api-arche:buildcache  #Lee caché
           cache-to: type=registry,ref=jsherrcode/api-arche:buildcache,mode=max  #Guarda caché
 
@@ -47,3 +72,16 @@ jobs:
             docker compose pull
             docker compose up -d
             docker image prune -f
+  
+  cleanup:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Delete old images
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+        run: bash .github/scripts/cleanup.sh
