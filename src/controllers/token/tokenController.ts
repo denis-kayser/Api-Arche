@@ -2,15 +2,41 @@ import { Request, Response } from 'express';
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from '../../config/config';
 import { formatInTimeZone } from 'date-fns-tz';
+import { ErrorCode } from '../../constants/errorCodes';
+import { UserSignIn } from '../../types/users/user';
+import { getUserByID } from '../../models/users/userModel';
 
-export const tokenController = (req: Request, res: Response) => {
+export const tokenController = async (req: Request, res: Response) => {
   try {
+    const { userID } = req.body;
+
+    if (!userID) {
+      return res.status(400).json({
+        ok: false,
+        code: ErrorCode.MISSING_PARAMS,
+        message: 'UserID es requerido',
+        data: []
+      });
+    }
+
+    const signInResult = await getUserByID({ userID });
+
+    if (!signInResult.ok) {
+      return res.status(401).json({
+        ok: false,
+        code: signInResult.code,
+        message: signInResult.message || 'Credenciales inválidas',
+        data: []
+      });
+    }
+
+    const user = signInResult.data as UserSignIn;
+    console.log({ user })
 
     // Payload del token
     const payload = {
-      // userId: req.body.userId || 'test-user',
-      // role: req.body.role || 'user',
-      // timestamp: Date.now()
+      userId: user.id,
+      timestamp: Date.now()
     };
 
     // Opciones para el token
@@ -40,12 +66,7 @@ export const tokenController = (req: Request, res: Response) => {
       message: "Autenticación exitosa",
       data: {
         access_token: token,
-        // token_type: "Bearer",
         expires_in: formattedDate
-        // expires_in: expiresAt.toLocaleDateString('es-PE') + ' ' + expiresAt.toLocaleTimeString('es-PE'),
-        // iso: expiresAt.toISOString(),                      // "2026-04-09T16:25:28.000Z"
-        // seconds: 7200                                      // 2 horas en segundos
-        // }
       }
     });
 
@@ -56,7 +77,7 @@ export const tokenController = (req: Request, res: Response) => {
     return res.status(500).json({
       ok: false,
       message: "Error interno del servidor",
-      data: { cod: 'INTERNAL_SERVER_ERROR' }
+      data: { code: ErrorCode.INTERNAL_ERROR }
     });
   }
 };

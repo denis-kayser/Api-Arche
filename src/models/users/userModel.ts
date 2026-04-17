@@ -1,4 +1,6 @@
 import { pool } from "../../config/conexion";
+import { ErrorCode } from "../../constants/errorCodes";
+import { SuccessCode } from "../../constants/successCodes";
 import { User, UserFilters } from "../../types/users/user";
 
 
@@ -80,7 +82,41 @@ export const getUserhModel = async (filters: UserFilters): Promise<User[]> => {
 };
 
 
+export const getUserByID = async ({ userID }: { userID: number }): Promise<any> => {
+
+  try {
+    const query = `
+    SELECT id FROM users
+    WHERE id = $1
+    AND is_active
+    `;
+    const values = [userID];
+
+    const result = await pool.query(query, values);
+    const data = result.rows[0];
+
+    if (!data) {
+      throw new Error('Usuario no encontrado');
+    }
+
+    return {
+      ok: true,
+      code: SuccessCode.SUCCESS,
+      message: 'Usuario encontrado',
+      data: data ?? []
+    };
+  } catch (error: unknown) {
+
+    const message = error instanceof Error ? error.message : 'Error al obtener la información';
+    console.error('Error en getUserByID:', message);
+
+    return {
+      ok: false,
+      code: ErrorCode.USER_NOT_FOUND,
+      message,
+      data: null
+    };
+  }
 
 
-
-
+}
