@@ -3,9 +3,56 @@ name: Build & Deploy
 on:
   push:
     branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
 
 jobs:
+
+  test-and-build:
+    name: Test & Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Build Docker (sin push)
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false 
+          no-cache: true
+
+      - name: Confirm build success
+        run: echo "Build OK"
+
+  code-quality:
+    name: SonarCloud Analysis
+    needs: test-and-build
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Necesario para SonarCloud (analiza historial completo)
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Automático de GitHub
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}     # El que acabas de crear
+
+      - name: SonarCloud Quality Gate
+        uses: SonarSource/sonarcloud-quality-gate-action@v1
+        timeout-minutes: 5
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   build-and-push:
+    name: Build & Push Docker Image
+    needs: code-quality  # Solo construye si pasa el análisis de código
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
@@ -19,7 +66,7 @@ jobs:
           password: ${{ secrets.DOCKER_PASSWORD }}
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3       #usar caché
+        uses: docker/setup-buildx-action@v3
 
       - name: Get version tag
         id: version
@@ -53,11 +100,13 @@ jobs:
           tags: |
             jsherrcode/api-arche:latest
             jsherrcode/api-arche:${{ steps.version.outputs.new_tag }}
-          cache-from: type=registry,ref=jsherrcode/api-arche:buildcache  #Lee caché
-          cache-to: type=registry,ref=jsherrcode/api-arche:buildcache,mode=max  #Guarda caché
+          cache-from: type=registry,ref=jsherrcode/api-arche:buildcache
+          cache-to: type=registry,ref=jsherrcode/api-arche:buildcache,mode=max
 
   deploy:
+    name: Deploy to VPS
     needs: build-and-push
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
 
     steps:
@@ -74,8 +123,11 @@ jobs:
             docker image prune -f
   
   cleanup:
+    name: Cleanup Old Images
     needs: build-and-push
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
+    
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
