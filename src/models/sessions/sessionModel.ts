@@ -73,3 +73,16 @@ export const closeAllSessionsByUserModel = async (userId: number): Promise<void>
     data: { is_active: false, last_seen_at: new Date() }
   });
 };
+
+// Al arrancar el proceso, el store en memoria de sockets siempre empieza vacío,
+// así que cualquier sesión que haya quedado marcada como activa de un arranque
+// anterior es necesariamente "fantasma" (su socket ya no existe). Se limpia
+// una sola vez al iniciar el servidor para que no se acumulen sesiones huérfanas.
+export const closeAllStaleSessionsModel = async (): Promise<number> => {
+  const result = await prisma.sessions.updateMany({
+    where: { is_active: true },
+    data: { is_active: false, last_seen_at: new Date() }
+  });
+
+  return result.count;
+};

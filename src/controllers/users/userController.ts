@@ -76,7 +76,7 @@ export const logoutAllDevices = async (req: Request, res: Response, next: NextFu
       return response.error(res, ErrorCode.VALIDATION_ERROR, 'ID de usuario inválido', 400);
     }
 
-    await sessionService.closeAllByUser(userId)
+    await sessionService.closeAllByUser(userId, req.currentUser!.id)
 
     return response.success(
       res,

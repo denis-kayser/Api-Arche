@@ -11,10 +11,10 @@ const parseId = (value: string | string[] | undefined): number | null => {
 };
 
 export const sessionController = {
-  // GET /sessions — todas las sesiones activas (vista admin)
+  // GET /sessions — sesiones activas visibles para quien pregunta (según su rol)
   getAll: async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const sessions = await sessionService.getAll();
+      const sessions = await sessionService.getAll(req.currentUser!.id);
       return response.success(res, SuccessCode.LIST_FETCHED, 'Sesiones obtenidas', sessions);
     } catch (error) {
       next(error);
@@ -30,7 +30,7 @@ export const sessionController = {
         return response.error(res, ErrorCode.VALIDATION_ERROR, 'ID de usuario inválido', 400);
       }
 
-      const sessions = await sessionService.getByUser(userId);
+      const sessions = await sessionService.getByUser(userId, req.currentUser!.id);
       return response.success(res, SuccessCode.LIST_FETCHED, 'Sesiones obtenidas', sessions);
     } catch (error) {
       next(error);
@@ -46,7 +46,7 @@ export const sessionController = {
         return response.error(res, ErrorCode.VALIDATION_ERROR, 'ID de sesión inválido', 400);
       }
 
-      await sessionService.close(sessionId);
+      await sessionService.close(sessionId, req.currentUser!.id);
       return response.success(res, SuccessCode.SUCCESS, 'Sesión cerrada correctamente', null);
     } catch (error) {
       next(error);
@@ -62,7 +62,7 @@ export const sessionController = {
         return response.error(res, ErrorCode.VALIDATION_ERROR, 'ID de usuario inválido', 400);
       }
 
-      await sessionService.closeAllByUser(userId);
+      await sessionService.closeAllByUser(userId, req.currentUser!.id);
       return response.success(res, SuccessCode.SUCCESS, 'Sesiones cerradas correctamente', null);
     } catch (error) {
       next(error);

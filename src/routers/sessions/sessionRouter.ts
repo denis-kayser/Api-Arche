@@ -1,16 +1,14 @@
 import { Router } from 'express'
 import { sessionController } from '../../controllers/sessions/sessionController'
-import { requireRole } from '../../middleware/requireRole'
+import { requireIdentity } from '../../middleware/requireIdentity'
 
 const router = Router()
 
-const ALLOWED_ROLES_TO_KICK = ['SUPER ADMIN', 'ADMIN', 'SOPORTE']
-
 // http://localhost:5000/api/v1/sessions
 router
-  .get('/sessions', sessionController.getAll)
-  .delete('/sessions/:id', requireRole(ALLOWED_ROLES_TO_KICK), sessionController.close)
-  .get('/users/:id/sessions', sessionController.getByUser)
-  .post('/users/:id/sessions/close-all', requireRole(ALLOWED_ROLES_TO_KICK), sessionController.closeAllByUser)
+  .get('/sessions', requireIdentity, sessionController.getAll)
+  .delete('/sessions/:id', requireIdentity, sessionController.close)
+  .get('/users/:id/sessions', requireIdentity, sessionController.getByUser)
+  .post('/users/:id/sessions/close-all', requireIdentity, sessionController.closeAllByUser)
 
 export default router
