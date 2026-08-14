@@ -17,7 +17,7 @@ export const signInModel = {
       // Buscar usuario por email
       const query = `
         SELECT "ID", "NAME", "EMAIL", "PASSWORD", "IMAGE_URL" 
-        FROM "USERS" 
+        FROM "users" 
         WHERE "EMAIL" = $1 
         AND "IS_ACTIVE" = true 
         AND "TYPE_AUTH" = 'CREDENTIALS' 
@@ -72,7 +72,7 @@ export const signInModel = {
 
       const query = `
         SELECT "ID" as id, "NAME" as name, "EMAIL" as email, "IMAGE_URL" as imageUrl, "TYPE_AUTH" as typeAuth
-        FROM "USERS"
+        FROM "users"
         WHERE "EMAIL" = $1 
         AND "AUTH_ID" = $2 
         AND "IS_ACTIVE" = true 
