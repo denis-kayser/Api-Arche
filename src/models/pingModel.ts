@@ -1,10 +1,8 @@
-import { pool } from '../config/conexion'
-
+import { prisma } from '../config/prisma'
 
 export const getPingModelo = async (): Promise<boolean> => {
   try {
-    const result = await pool.query('SELECT 1 as ok')
-    console.log('DB Response:', result.rows)
+    await prisma.$queryRaw`SELECT 1`
     return true
   } catch (error) {
     console.error('DB Connection Error:', error)

@@ -1,22 +1,19 @@
-import { Request, Response } from 'express'
+import { NextFunction, Request, Response } from 'express'
 import { getPingService } from '../service/pinService'
+import { response } from '../util/response'
+import { SuccessCode } from '../constants/successCodes'
+import { ErrorCode } from '../constants/errorCodes'
 
-
-export const getPingController = async (req: Request, res: Response) => {
+export const getPingController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await getPingService()
 
     if (!result.ok) {
-      return res.status(500).json(result)
+      return response.error(res, ErrorCode.DATABASE_CONNECTION_ERROR, result.message, 503)
     }
 
-    return res.json(result)
+    return response.success(res, SuccessCode.SUCCESS, result.message, { result: result.result })
   } catch (error) {
-    console.error('Controller Error:', error)
-
-    return res.status(500).json({
-      ok: false,
-      message: 'Error interno del servidor',
-    })
+    next(error)
   }
 }

@@ -1,43 +1,15 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from '../../config/config';
 import { formatInTimeZone } from 'date-fns-tz';
-import { ErrorCode } from '../../constants/errorCodes';
-import { UserSignIn } from '../../types/users/user';
-import { getUserByID } from '../../models/users/userModel';
+import { response } from '../../util/response';
+import { SuccessCode } from '../../constants/successCodes';
 
-export const tokenController = async (req: Request, res: Response) => {
+export const tokenController = (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { userID } = req.body;
-
-    if (!userID) {
-      return res.status(400).json({
-        ok: false,
-        code: ErrorCode.MISSING_PARAMS,
-        message: 'UserID es requerido',
-        data: []
-      });
-    }
-
-    const signInResult = await getUserByID({ userID });
-
-    if (!signInResult.ok) {
-      return res.status(401).json({
-        ok: false,
-        code: signInResult.code,
-        message: signInResult.message || 'Credenciales inválidas',
-        data: []
-      });
-    }
-
-    const user = signInResult.data as UserSignIn;
-    console.log({ user })
 
     // Payload del token
-    const payload = {
-      userId: user.id,
-      timestamp: Date.now()
-    };
+    const payload = {};
 
     // Opciones para el token
     const options: jwt.SignOptions = {
@@ -46,7 +18,6 @@ export const tokenController = async (req: Request, res: Response) => {
       audience: "external-services"
     };
 
-    // Asegurar que JWT_SECRET no sea undefined
     if (!JWT_SECRET) {
       throw new Error('JWT_SECRET no está configurado');
     }
@@ -61,23 +32,12 @@ export const tokenController = async (req: Request, res: Response) => {
       "yyyy-MM-dd HH:mm:ss"
     );
 
-    return res.json({
-      ok: true,
-      message: "Autenticación exitosa",
-      data: {
-        access_token: token,
-        expires_in: formattedDate
-      }
+    return response.success(res, SuccessCode.TOKEN_GENERATED, 'Autenticación exitosa', {
+      access_token: token,
+      expires_in: formattedDate
     });
 
-  } catch (error: any) {
-
-    console.error('Error generando token:', error);
-
-    return res.status(500).json({
-      ok: false,
-      message: "Error interno del servidor",
-      data: { code: ErrorCode.INTERNAL_ERROR }
-    });
+  } catch (error) {
+    next(error);
   }
 };

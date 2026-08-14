@@ -1,48 +1,14 @@
 // src/controllers/users/userController.ts
 import { NextFunction, Request, Response } from "express";
 import { UserFilters } from "../../types/users/user"
-import { getUserService } from "../../service/users/userService"
-import { ParamsType } from "../../types/express/express"
+import { getUserService, updateUserService } from "../../service/users/userService"
 import { response } from "../../util/response";
 import { SuccessCode } from "../../constants/successCodes";
 import { ErrorCode } from "../../constants/errorCodes";
-import { disconnectAllSessions } from "../../service/socket/socketService";
+import { sessionService } from "../../service/sessions/sessionService";
 
 
-// export const userController: ParamsType = async (req, res) => {
-
-//   try {
-//     const { name, isActive, rolId } = req.query
-
-//     const filters: UserFilters = {
-//       name: name as string ?? null,
-//       isActive: isActive !== undefined ? isActive === 'true' : null,
-//       rolId: rolId !== undefined ? Number(rolId) : null
-//     }
-
-//     const result = await getUserService(filters)
-//     console.log({ result });
-
-
-//     if (!result.ok) {
-//       return res.status(204).json(result)
-//     }
-
-//     return res.status(200).json(result)
-//   } catch (error) {
-//     console.error('Controller Error:', error)
-//     const message = error instanceof Error ? error.message : 'Error al obtener la información';
-//     return res.status(500).json({
-//       ok: false,
-//       message: message,
-//     })
-
-//   }
-// }
-
-
-export const userController: ParamsType = async (req, res) => {
-
+export const userController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { name, isActive, rolId } = req.query;
 
@@ -72,62 +38,53 @@ export const userController: ParamsType = async (req, res) => {
     );
 
   } catch (error) {
-    console.error('Controller Error:', error);
+    next(error);
+  }
+};
 
-    return response.error(
+
+export const updateUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id) || id <= 0) {
+      return response.error(res, ErrorCode.VALIDATION_ERROR, 'ID de usuario inválido', 400);
+    }
+
+    const { username, alias, imageUrl } = req.body;
+
+    const updated = await updateUserService(id, { username, alias, imageUrl });
+
+    return response.success(
       res,
-      ErrorCode.INTERNAL_ERROR,
-      error instanceof Error ? error.message : 'Error al obtener la información'
+      SuccessCode.UPDATED,
+      'Usuario actualizado correctamente',
+      updated
     );
+
+  } catch (error) {
+    next(error);
   }
 };
 
 
 export const logoutAllDevices = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { userId } = req.params
+    const userId = Number(req.params.userId)
 
-    disconnectAllSessions(userId as string)
+    if (!Number.isInteger(userId) || userId <= 0) {
+      return response.error(res, ErrorCode.VALIDATION_ERROR, 'ID de usuario inválido', 400);
+    }
 
-    return res.status(200).json({
-      ok: true,
-      message: 'Sesiones cerradas correctamente'
-    })
+    await sessionService.closeAllByUser(userId)
+
+    return response.success(
+      res,
+      SuccessCode.UPDATED,
+      'Sesiones cerradas correctamente',
+      null
+    )
   } catch (error) {
     next(error)
   }
 }
-
-
-// export const registerController: ParamsType = async (req, res) => {
-//   try {
-//     const { name, email, password, rolID } = req.body;
-
-//     if (!name || !email) {
-//       return res.status(400).json({
-//         ok: false,
-//         message: 'Todos los campos son requeridos',
-//         data: null,
-//       });
-//     }
-
-//     const data: UserRegisterProps = { name, email, password, rolID };
-
-//     const result = await postUserRegisterService(data);
-
-//     if (!result.ok) {
-//       return res.status(400).json(result);
-//     }
-
-//     return res.status(201).json(result);
-
-//   } catch (error) {
-//     console.error('Controller Error:', error);
-//     const message = error instanceof Error ? error.message : 'Error al registrar usuario';
-//     return res.status(500).json({
-//       ok: false,
-//       message: message,
-//       data: null,
-//     });
-//   }
-// };
