@@ -15,10 +15,3 @@ export type ErrorMiddlewareType = (
   res: Response,
   next: NextFunction
 ) => void
-
-
-// Tipo para controladores (sin next)
-export type ParamsType = (
-  req: Request,
-  res: Response
-) => Promise<void | Response> | void | Response;

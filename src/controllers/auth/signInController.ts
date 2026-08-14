@@ -1,32 +1,19 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { UserRegisterProps } from "../../types/users/register"
-import { ParamsType } from "../../types/express/express"
 import { response } from "../../util/response";
 import { SuccessCode } from "../../constants/successCodes";
-import { ErrorCode } from "../../constants/errorCodes";
 import { signInService } from "../../service/auth/authService";
-import { isDatabaseError } from '../../util/errors';
 import { UserSignInGoogle } from "../../types/users/user";
 
 
 export const signInController = {
-  Credentials: async (req: Request, res: Response) => {
+  Credentials: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, password } = req.body;
-
-      if (!email || !password) {
-        return response.error(
-          res,
-          ErrorCode.MISSING_PARAMS,
-          'Todos los campos son requeridos',
-          400
-        );
-      }
 
       const data: UserRegisterProps = { email, password };
 
       const result = await signInService.Credentials(data);
-
 
       return res.status(200).json({
         ok: result.ok,
@@ -35,48 +22,18 @@ export const signInController = {
         data: result.data
       })
 
-
     } catch (error) {
-      console.error('Controller Error:', error);
-
-      return response.error(
-        res,
-        ErrorCode.INTERNAL_ERROR,
-        error instanceof Error ? error.message : 'Error al iniciar sesión'
-      );
+      next(error);
     }
 
   },
-  Google: async (req: Request, res: Response) => {
+  Google: async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { email, authID } = req.body;
 
-      if (!email || !authID) {
-        return response.error(
-          res,
-          ErrorCode.MISSING_PARAMS,
-          'Todos los campos son requeridos',
-          400
-        );
-      }
-
-      if (!email.includes('@')) {
-        return response.error(
-          res,
-          ErrorCode.INVALID_EMAIL,
-          'El email no es válido',
-          400
-        );
-      }
-
       const user: UserSignInGoogle = { email, authID };
 
-      // servicio para verificar usuario
       const result = await signInService.Google(user);
-
-      console.log(result);
-
-
 
       return response.success(
         res,
@@ -87,23 +44,7 @@ export const signInController = {
       );
 
     } catch (error) {
-      console.error('Controller Error:', error);
-
-      const message = error instanceof Error ? error.message : 'Error al iniciar sesión';
-      if (isDatabaseError(error)) {
-        return response.error(
-          res,
-          ErrorCode.DATABASE_ERROR,
-          'No se puede conectar al servidor de base de datos',
-          503
-        );
-      }
-
-      return response.error(
-        res,
-        ErrorCode.INTERNAL_ERROR,
-        message
-      );
+      next(error);
     }
   }
 }

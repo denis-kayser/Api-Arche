@@ -9,16 +9,13 @@ export interface UserFilters {
 export interface User {
   id: number;
   name: string;
-  rolId: number;
+  rolId: number | null;
   isActive: boolean;
   email: string;
-  password: string;
-  imageUrl: string;
-  authID: string;
+  imageUrl: string | null;
+  authID: string | null;
   typeAuth: string;
 }
-
-
 
 // Interface para iniciar sesion con google
 export interface UserSignInGoogle {
@@ -35,41 +32,12 @@ export interface UserSignInGoogleResponse {
   typeAuth: string;
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export interface UserSignIn {
   id: number;
   name: string;
   email: string;
-  password?: string;
   imageUrl: string;
 }
-
-export interface UserSignIn {
-  id: number;
-  name: string;
-  email: string;
-  password?: string;
-  imageUrl: string;
-}
-
-
 
 // Props
 export interface UserRegisterGoogleProps {
@@ -89,4 +57,11 @@ export interface UserRegisterProps {
 export interface SignInGoogleProps {
   email: string;
   authID: string;
+}
+
+// Props para actualizar el perfil propio del usuario
+export interface UpdateUserProps {
+  username?: string;
+  alias?: string;
+  imageUrl?: string;
 }

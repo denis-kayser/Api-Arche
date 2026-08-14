@@ -40,6 +40,27 @@ Content-Type: application/json
   "password": "1234"
 }
 
+#### prueba sign-up-credentials
+POST {{API_URL}}/api/v1/auth/sign-up-credentials
+Content-Type: application/json
+
+{
+  "name": "Usuario Prueba",
+  "email": "prueba@example.com",
+  "password": "secret123"
+}
+
+#### prueba sign-up-google
+POST {{API_URL}}/api/v1/auth/sign-up-google
+Content-Type: application/json
+
+{
+  "name": "Usuario Google",
+  "email": "prueba.google@example.com",
+  "imageUrl": "https://example.com/avatar.png",
+  "authID": "123456789"
+}
+
 # ==============================================================================
 # ==============================================================================
 #Se necesita TOKEN para acceder a los modulos

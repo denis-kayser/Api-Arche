@@ -1,17 +1,15 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import jwt from "jsonwebtoken";
 import { JWT_SECRET } from '../../config/config';
 import { formatInTimeZone } from 'date-fns-tz';
+import { response } from '../../util/response';
+import { SuccessCode } from '../../constants/successCodes';
 
-export const tokenController = (req: Request, res: Response) => {
+export const tokenController = (req: Request, res: Response, next: NextFunction) => {
   try {
 
     // Payload del token
-    const payload = {
-      // userId: req.body.userId || 'test-user',
-      // role: req.body.role || 'user',
-      // timestamp: Date.now()
-    };
+    const payload = {};
 
     // Opciones para el token
     const options: jwt.SignOptions = {
@@ -20,7 +18,6 @@ export const tokenController = (req: Request, res: Response) => {
       audience: "external-services"
     };
 
-    // Asegurar que JWT_SECRET no sea undefined
     if (!JWT_SECRET) {
       throw new Error('JWT_SECRET no está configurado');
     }
@@ -35,28 +32,12 @@ export const tokenController = (req: Request, res: Response) => {
       "yyyy-MM-dd HH:mm:ss"
     );
 
-    return res.json({
-      ok: true,
-      message: "Autenticación exitosa",
-      data: {
-        access_token: token,
-        // token_type: "Bearer",
-        expires_in: formattedDate
-        // expires_in: expiresAt.toLocaleDateString('es-PE') + ' ' + expiresAt.toLocaleTimeString('es-PE'),
-        // iso: expiresAt.toISOString(),                      // "2026-04-09T16:25:28.000Z"
-        // seconds: 7200                                      // 2 horas en segundos
-        // }
-      }
+    return response.success(res, SuccessCode.TOKEN_GENERATED, 'Autenticación exitosa', {
+      access_token: token,
+      expires_in: formattedDate
     });
 
-  } catch (error: any) {
-
-    console.error('Error generando token:', error);
-
-    return res.status(500).json({
-      ok: false,
-      message: "Error interno del servidor",
-      data: { cod: 'INTERNAL_SERVER_ERROR' }
-    });
+  } catch (error) {
+    next(error);
   }
 };
