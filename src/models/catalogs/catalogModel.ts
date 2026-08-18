@@ -1,4 +1,5 @@
 import { prisma } from "../../config/prisma";
+import { document_types, roles, permissions } from "@prisma/client";
 
 // ====================================
 // Tipos de documento
@@ -8,26 +9,27 @@ export const documentTypeModel = {
     return prisma.document_types.findMany({ orderBy: { id: 'asc' } });
   },
   create: async (data: { name: string; abbreviation?: string }) => {
-    return prisma.document_types.create({
-      data: { name: data.name, abbreviation: data.abbreviation ?? null },
-    });
+    const rows = await prisma.$queryRaw<document_types[]>`
+      SELECT * FROM ft_create_document_type(${data.name}::varchar, ${data.abbreviation ?? null}::varchar)
+    `;
+    return rows[0];
   },
   update: async (id: number, data: { name?: string; abbreviation?: string; isActive?: boolean }) => {
-    return prisma.document_types.update({
-      where: { id },
-      data: {
-        ...(data.name !== undefined ? { name: data.name } : {}),
-        ...(data.abbreviation !== undefined ? { abbreviation: data.abbreviation } : {}),
-        ...(data.isActive !== undefined ? { is_active: data.isActive } : {}),
-        updated_at: new Date(),
-      },
-    });
+    const rows = await prisma.$queryRaw<document_types[]>`
+      SELECT * FROM ft_update_document_type(
+        ${id}::integer,
+        ${data.name ?? null}::varchar,
+        ${data.abbreviation ?? null}::varchar,
+        ${data.isActive ?? null}::boolean
+      )
+    `;
+    return rows[0];
   },
   softDelete: async (id: number) => {
-    return prisma.document_types.update({
-      where: { id },
-      data: { is_active: false, updated_at: new Date() },
-    });
+    const rows = await prisma.$queryRaw<document_types[]>`
+      SELECT * FROM ft_deactivate_document_type(${id}::integer)
+    `;
+    return rows[0];
   },
 }
 
@@ -39,23 +41,26 @@ export const roleModel = {
     return prisma.roles.findMany({ orderBy: { id: 'asc' } });
   },
   create: async (data: { description: string }) => {
-    return prisma.roles.create({ data: { description: data.description } });
+    const rows = await prisma.$queryRaw<roles[]>`
+      SELECT * FROM ft_create_role(${data.description}::varchar)
+    `;
+    return rows[0];
   },
   update: async (id: number, data: { description?: string; isActive?: boolean }) => {
-    return prisma.roles.update({
-      where: { id },
-      data: {
-        ...(data.description !== undefined ? { description: data.description } : {}),
-        ...(data.isActive !== undefined ? { is_active: data.isActive } : {}),
-        updated_At: new Date(),
-      },
-    });
+    const rows = await prisma.$queryRaw<roles[]>`
+      SELECT * FROM ft_update_role(
+        ${id}::integer,
+        ${data.description ?? null}::varchar,
+        ${data.isActive ?? null}::boolean
+      )
+    `;
+    return rows[0];
   },
   softDelete: async (id: number) => {
-    return prisma.roles.update({
-      where: { id },
-      data: { is_active: false, updated_At: new Date() },
-    });
+    const rows = await prisma.$queryRaw<roles[]>`
+      SELECT * FROM ft_deactivate_role(${id}::integer)
+    `;
+    return rows[0];
   },
 }
 
@@ -67,21 +72,25 @@ export const permissionModel = {
     return prisma.permissions.findMany({ orderBy: { id: 'asc' } });
   },
   create: async (data: { id: number; name: string }) => {
-    return prisma.permissions.create({ data: { id: data.id, name: data.name } });
+    const rows = await prisma.$queryRaw<permissions[]>`
+      SELECT * FROM ft_create_permission(${data.id}::integer, ${data.name}::varchar)
+    `;
+    return rows[0];
   },
   update: async (id: number, data: { name?: string; isActive?: boolean }) => {
-    return prisma.permissions.update({
-      where: { id },
-      data: {
-        ...(data.name !== undefined ? { name: data.name } : {}),
-        ...(data.isActive !== undefined ? { is_active: data.isActive } : {}),
-      },
-    });
+    const rows = await prisma.$queryRaw<permissions[]>`
+      SELECT * FROM ft_update_permission(
+        ${id}::integer,
+        ${data.name ?? null}::varchar,
+        ${data.isActive ?? null}::boolean
+      )
+    `;
+    return rows[0];
   },
   softDelete: async (id: number) => {
-    return prisma.permissions.update({
-      where: { id },
-      data: { is_active: false },
-    });
+    const rows = await prisma.$queryRaw<permissions[]>`
+      SELECT * FROM ft_deactivate_permission(${id}::integer)
+    `;
+    return rows[0];
   },
 }

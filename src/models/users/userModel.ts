@@ -53,25 +53,26 @@ export const getUserhModel = async (filters: UserFilters): Promise<User[]> => {
 
 export const updateUserModel = async (id: number, data: UpdateUserProps): Promise<User> => {
   try {
-    const updated = await prisma.users.update({
-      where: { id },
-      data: {
-        ...(data.username !== undefined ? { username: data.username } : {}),
-        ...(data.alias !== undefined ? { alias: data.alias } : {}),
-        ...(data.imageUrl !== undefined ? { image_url: data.imageUrl } : {}),
-        updated_at: new Date(),
-      },
-      select: {
-        id: true,
-        username: true,
-        rol_id: true,
-        is_active: true,
-        email: true,
-        image_url: true,
-        auth_id: true,
-        type_auth: true,
-      },
-    });
+    const rows = await prisma.$queryRaw<{
+      id: number;
+      username: string | null;
+      rol_id: number | null;
+      is_active: boolean;
+      email: string;
+      image_url: string | null;
+      auth_id: string | null;
+      type_auth: string;
+    }[]>`
+      SELECT id, username, rol_id, is_active, email, image_url, auth_id, type_auth
+      FROM ft_update_user(
+        ${id}::integer,
+        ${data.username ?? null}::varchar,
+        ${data.alias ?? null}::varchar,
+        ${data.imageUrl ?? null}::text
+      )
+    `;
+
+    const updated = rows[0];
 
     return {
       id: updated.id,

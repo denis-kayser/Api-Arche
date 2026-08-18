@@ -1,7 +1,7 @@
 -- ============================================================================
 -- ft_register_user
 -- Reemplazo (como FUNCTION, no PROCEDURE) del viejo sp_registeruser roto
--- (ver sql/procedures/sp_registeruser.sql). Adaptado a las columnas reales
+-- (ver sql/procedures/auth/sp_registeruser.sql). Adaptado a las columnas reales
 -- actuales de "users" (minúscula): email, username, password_hash, rol_id,
 -- image_url, auth_id, type_auth, is_active.
 --
@@ -19,10 +19,11 @@
 -- Google, claim "sub", tienen 18-21 dígitos y no entran ni en bigint de 64
 -- bits) — este function ya trata p_auth_id como texto, sin castear a integer.
 --
--- Estado: NO está conectado a la API todavía. src/models/auth/authModel.ts
--- usa Prisma ORM directo (prisma.users.create). Este archivo queda como
--- referencia/opción para quien quiera volver a mover esta lógica a la BD.
--- Para usarlo desde la API: prisma.$queryRaw`SELECT * FROM ft_register_user(...)`.
+-- Estado: conectado a la API. src/models/auth/authModel.ts (signUpModel.Credentials
+-- y signUpModel.Google) llama a esta función vía
+-- prisma.$queryRaw`SELECT * FROM ft_register_user(...)` en vez de
+-- prisma.users.create(), para evitar que Prisma calcule los timestamps en
+-- Node (desfase de zona horaria) y para centralizar el INSERT en la BD.
 -- ============================================================================
 
 CREATE OR REPLACE FUNCTION public.ft_register_user(

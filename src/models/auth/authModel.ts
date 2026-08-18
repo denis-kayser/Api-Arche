@@ -89,16 +89,17 @@ export const signUpModel = {
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password!, salt);
 
-    await prisma.users.create({
-      data: {
-        username: name?.trim(),
-        email: normalizedEmail,
-        password_hash: hashedPassword,
-        rol_id: rolID ?? null,
-        type_auth: 'CREDENTIALS',
-        is_active: true,
-      }
-    });
+    await prisma.$queryRaw`
+      SELECT * FROM ft_register_user(
+        ${name?.trim() ?? null}::varchar,
+        ${normalizedEmail}::varchar,
+        ${hashedPassword}::varchar,
+        ${rolID ?? null}::integer,
+        ${null}::text,
+        ${null}::varchar,
+        ${'CREDENTIALS'}::varchar
+      )
+    `;
 
     return { ok: true, message: 'Usuario registrado correctamente' };
   },
@@ -121,16 +122,17 @@ export const signUpModel = {
       throw error;
     }
 
-    await prisma.users.create({
-      data: {
-        username: name?.trim(),
-        email: normalizedEmail,
-        image_url: imageUrl ?? null,
-        auth_id: authID ?? null,
-        type_auth: 'GOOGLE',
-        is_active: true,
-      }
-    });
+    await prisma.$queryRaw`
+      SELECT * FROM ft_register_user(
+        ${name?.trim() ?? null}::varchar,
+        ${normalizedEmail}::varchar,
+        ${null}::varchar,
+        ${null}::integer,
+        ${imageUrl ?? null}::text,
+        ${authID ?? null}::varchar,
+        ${'GOOGLE'}::varchar
+      )
+    `;
 
     return { ok: true, message: 'Usuario registrado correctamente' };
   }

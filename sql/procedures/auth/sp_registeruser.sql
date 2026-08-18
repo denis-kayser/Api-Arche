@@ -10,10 +10,10 @@
 -- Si se ejecuta un CALL sp_registeruser(...) tal cual, Postgres fallará con
 -- "column ... does not exist".
 --
--- Por eso la API (src/models/auth/authModel.ts) ya NO llama a este procedure:
--- el registro de usuarios se hace directo vía Prisma ORM (prisma.users.create).
--- Este archivo queda como referencia/backup de lo que hay en la BD, y como
--- base si en algún momento se quiere corregir y volver a usar el procedure.
+-- Por eso la API (src/models/auth/authModel.ts) nunca llamó a este procedure:
+-- el registro de usuarios usa la función sql/functions/auth/ft_register_user.sql
+-- (FUNCTION, no PROCEDURE, adaptada a las columnas reales en minúscula).
+-- Este archivo queda como referencia/backup histórico de lo que hubo en la BD.
 -- ============================================================================
 
 CREATE OR REPLACE PROCEDURE public.sp_registeruser(
