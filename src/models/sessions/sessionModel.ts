@@ -33,7 +33,7 @@ export const createSessionModel = async (data: CreateSessionProps): Promise<void
 
 // Cierra la sesión asociada a un socket (llamado al desconectar el socket).
 export const closeSessionModel = async (socketId: string): Promise<void> => {
-  await prisma.$queryRaw`SELECT ft_close_session(${socketId}::varchar)`;
+  await prisma.$executeRaw`SELECT ft_close_session(${socketId}::varchar)`;
 };
 
 // Lista las sesiones activas de un usuario (para que el frontend muestre sus dispositivos conectados).
@@ -64,7 +64,7 @@ export const getAllActiveSessionsModel = async (): Promise<UserSession[]> => {
 
 // Cierra en BD todas las sesiones de un usuario (además del kick en vivo por socket).
 export const closeAllSessionsByUserModel = async (userId: number): Promise<void> => {
-  await prisma.$queryRaw`SELECT ft_close_all_sessions_by_user(${userId}::integer)`;
+  await prisma.$executeRaw`SELECT ft_close_all_sessions_by_user(${userId}::integer)`;
 };
 
 // Al arrancar el proceso, el store en memoria de sockets siempre empieza vacío,
