@@ -7,7 +7,7 @@
   "type": "commonjs",
   "main": "dist/server.js",
   "engines": {
-    "node": "^24.14.1"
+    "node": "^24.19.0"
   },
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/server.ts",
