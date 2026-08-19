@@ -1,5 +1,6 @@
 import { io } from "../../server"
 import { socketStore } from "../../socket/socketStore"
+import { closeSessionModel } from "../../models/sessions/sessionModel"
 
 export const disconnectAllSessions = (userId: string): void => {
     const sockets = socketStore.get(userId)
@@ -16,6 +17,12 @@ export const disconnectAllSessions = (userId: string): void => {
 
             socket.disconnect(true)
         }
+
+        closeSessionModel(socketId)
+            .then(() => io.emit('sessions_changed'))
+            .catch((error) => {
+                console.error('Error cerrando sesión en BD:', error)
+            })
     }
 
     socketStore.delete(userId)
@@ -23,8 +30,6 @@ export const disconnectAllSessions = (userId: string): void => {
 
 export const disconnectOneSession = (userId: string, socketId: string): void => {
     const sockets = socketStore.get(userId)
-
-    if (!sockets) return
 
     const socket = io.sockets.sockets.get(socketId)
 
@@ -34,9 +39,17 @@ export const disconnectOneSession = (userId: string, socketId: string): void => 
         })
 
         socket.disconnect(true)
+    }
 
+    if (sockets) {
         socketStore.remove(userId, socketId)
     }
+
+    closeSessionModel(socketId)
+        .then(() => io.emit('sessions_changed'))
+        .catch((error) => {
+            console.error('Error cerrando sesión en BD:', error)
+        })
 }
 
 export const disconnectOtherSessions = (userId: string, currentSocketId: string): void => {
@@ -57,6 +70,12 @@ export const disconnectOtherSessions = (userId: string, currentSocketId: string)
             }
 
             socketStore.remove(userId, socketId)
+
+            closeSessionModel(socketId)
+                .then(() => io.emit('sessions_changed'))
+                .catch((error) => {
+                    console.error('Error cerrando sesión en BD:', error)
+                })
         }
     }
 }

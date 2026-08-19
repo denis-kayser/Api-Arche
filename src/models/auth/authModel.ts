@@ -1,4 +1,4 @@
-import { pool } from "../../config/conexion";
+import { prisma } from "../../config/prisma";
 import bcrypt from "bcryptjs";
 import { SpResult, SpResultBasic } from "../../types/response/response";
 import { UserRegisterGoogleProps, UserRegisterProps } from "../../types/users/register";
@@ -11,85 +11,62 @@ import { ErrorCode } from "../../constants/errorCodes";
 // ====================================
 export const signInModel = {
   Credentials: async (data: UserRegisterProps): Promise<SpResult<UserSignIn>> => {
-    try {
-      const { email, password } = data;
+    const { email, password } = data;
 
-      // Buscar usuario por email
-      const query = `
-        SELECT "ID", "NAME", "EMAIL", "PASSWORD", "IMAGE_URL" 
-        FROM "users" 
-        WHERE "EMAIL" = $1 
-        AND "IS_ACTIVE" = true 
-        AND "TYPE_AUTH" = 'CREDENTIALS' 
-        `;
+    const user = await prisma.users.findFirst({
+      where: { email, is_active: true, type_auth: 'CREDENTIALS' },
+      select: { id: true, username: true, email: true, password_hash: true, image_url: true }
+    });
 
-      const result = await pool.query(query, [email]);
-
-      if (result.rows.length === 0) {
-        return {
-          ok: false,
-          code: ErrorCode.INVALID_EMAIL,
-          message: 'Usuario no encontrado',
-          data: [],
-        };
-      }
-
-      const { PASSWORD, ...user } = result.rows[0];
-
-
-      // Comparar contraseña ingresada con el hash almacenado
-      const isMatch: boolean = await bcrypt.compare(password!, PASSWORD);
-
-      if (!isMatch) {
-        return {
-          ok: false,
-          code: ErrorCode.INVALID_PASSWORD,
-          message: 'Contraseña incorrecta',
-          data: [],
-        };
-      }
+    if (!user) {
       return {
-        ok: true,
-        message: 'Inicio de sesión exitoso',
-        code: SuccessCode.SUCCESS,
-        data: user
+        ok: false,
+        code: ErrorCode.INVALID_EMAIL,
+        message: 'Usuario no encontrado',
+        data: [],
       };
-
-    } catch (error) {
-      console.error('Error en signInModel.Credentials:', error);
-
-      throw new Error(
-        error instanceof Error
-          ? error.message
-          : 'Error al iniciar sesión'
-      );
     }
+
+    const isMatch: boolean = await bcrypt.compare(password!, user.password_hash ?? '');
+
+    if (!isMatch) {
+      return {
+        ok: false,
+        code: ErrorCode.INVALID_PASSWORD,
+        message: 'Contraseña incorrecta',
+        data: [],
+      };
+    }
+
+    return {
+      ok: true,
+      message: 'Inicio de sesión exitoso',
+      code: SuccessCode.SUCCESS,
+      data: {
+        id: user.id,
+        name: user.username ?? '',
+        email: user.email,
+        imageUrl: user.image_url ?? '',
+      }
+    };
   },
-  Google: async (data: UserSignInGoogle): Promise<UserSignInGoogleResponse> => {
-    try {
-      const { email, authID } = data;
+  Google: async (data: UserSignInGoogle): Promise<UserSignInGoogleResponse | undefined> => {
+    const { email, authID } = data;
 
+    const user = await prisma.users.findFirst({
+      where: { email, auth_id: authID, is_active: true, type_auth: 'GOOGLE' },
+      select: { id: true, username: true, email: true, image_url: true, type_auth: true }
+    });
 
-      const query = `
-        SELECT "ID" as id, "NAME" as name, "EMAIL" as email, "IMAGE_URL" as imageUrl, "TYPE_AUTH" as typeAuth
-        FROM "users"
-        WHERE "EMAIL" = $1 
-        AND "AUTH_ID" = $2 
-        AND "IS_ACTIVE" = true 
-        AND "TYPE_AUTH" = 'GOOGLE' 
-        `;
-      const values = [email, authID];
+    if (!user) return undefined;
 
-      const result = await pool.query(query, values);
-
-      const user = result.rows[0];
-      return user
-
-    } catch (error: unknown) {
-      console.error('Error en signInModel.Google:', error);
-      const message = error instanceof Error ? error.message : 'Error desconocido';
-      throw new Error(message);
-    }
+    return {
+      id: user.id,
+      name: user.username ?? '',
+      email: user.email,
+      imageUrl: user.image_url ?? '',
+      typeAuth: user.type_auth,
+    };
   }
 }
 
@@ -97,54 +74,66 @@ export const signInModel = {
 // Crea Usurio
 // ====================================
 export const signUpModel = {
-  Credentials: async (data: UserRegisterProps): Promise<any> => {
-    try {
-      const { name, email, password, rolID } = data;
+  Credentials: async (data: UserRegisterProps): Promise<SpResultBasic> => {
+    const { name, email, password, rolID } = data;
 
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(password!, salt);
+    const normalizedEmail = email.trim().toLowerCase();
 
-      const query = 'CALL sp_registerUser($1, $2, $3, $4, $5, $6, $7)';
-      const values = [name, email, hashedPassword, rolID, 'HTTP://localhost:5173', null, 'CREDENTIALS'];
-
-      const result = await pool.query(query, values);
-
-      const response: SpResultBasic | undefined = result.rows[0];
-
-
-      return response
-
-    } catch (error) {
-      console.error('Error en postSignUpCredentialsModel:', error);
-
-      throw new Error(
-        error instanceof Error
-          ? error.message
-          : 'Error al registrar usuario'
-      );
+    const existing = await prisma.users.findFirst({ where: { email: normalizedEmail } });
+    if (existing) {
+      const error: Error & { code?: ErrorCode } = new Error('El email ya está registrado');
+      error.code = ErrorCode.DUPLICATE_EMAIL;
+      throw error;
     }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password!, salt);
+
+    await prisma.$queryRaw`
+      SELECT * FROM ft_register_user(
+        ${name?.trim() ?? null}::varchar,
+        ${normalizedEmail}::varchar,
+        ${hashedPassword}::varchar,
+        ${rolID ?? null}::integer,
+        ${null}::text,
+        ${null}::varchar,
+        ${'CREDENTIALS'}::varchar
+      )
+    `;
+
+    return { ok: true, message: 'Usuario registrado correctamente' };
   },
-  Google: async (data: UserRegisterGoogleProps): Promise<any> => {
+  Google: async (data: UserRegisterGoogleProps): Promise<SpResultBasic> => {
+    const { name, email, imageUrl, authID } = data;
 
-    try {
-      const { name, email, imageUrl, authID } = data;
+    const normalizedEmail = email.trim().toLowerCase();
 
-      const query = 'CALL sp_registerUser($1, $2, $3, $4, $5, $6, $7) ';
-      const values = [name, email, null, null, imageUrl, authID, 'GOOGLE'];
-
-      const result = await pool.query(query, values);
-
-      const response: SpResultBasic | undefined = result.rows[0];
-
-      return response
-
-    } catch (error) {
-      const message = error instanceof Error ? error.message : 'Error al registrar usuario';
-      console.log(message);
-
-      throw new Error(
-        error instanceof Error ? error.message : 'Error al registrar usuario'
-      );
+    const existing = await prisma.users.findFirst({
+      where: {
+        OR: [
+          { email: normalizedEmail },
+          ...(authID ? [{ auth_id: authID, type_auth: 'GOOGLE' }] : [])
+        ]
+      }
+    });
+    if (existing) {
+      const error: Error & { code?: ErrorCode } = new Error('El usuario ya está registrado');
+      error.code = ErrorCode.DUPLICATE_EMAIL;
+      throw error;
     }
+
+    await prisma.$queryRaw`
+      SELECT * FROM ft_register_user(
+        ${name?.trim() ?? null}::varchar,
+        ${normalizedEmail}::varchar,
+        ${null}::varchar,
+        ${null}::integer,
+        ${imageUrl ?? null}::text,
+        ${authID ?? null}::varchar,
+        ${'GOOGLE'}::varchar
+      )
+    `;
+
+    return { ok: true, message: 'Usuario registrado correctamente' };
   }
 }

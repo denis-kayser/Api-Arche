@@ -1,0 +1,178 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model companies {
+  id             Int            @id @default(autoincrement())
+  uid            String?        @default(dbgenerated("replace((gen_random_uuid())::text, '-'::text, ''::text)")) @db.VarChar(35)
+  doc_number     String         @db.VarChar(30)
+  legal_name     String         @db.VarChar(100)
+  trade_name     String?        @db.VarChar(100)
+  location_code  String?        @db.VarChar(10)
+  address        String         @db.VarChar(255)
+  lat            Decimal        @db.Decimal(10, 8)
+  lon            Decimal        @db.Decimal(10, 8)
+  is_active      Boolean        @default(true)
+  created_at     DateTime?      @default(now()) @db.Timestamp(6)
+  updated_at     DateTime?      @db.Timestamp(6)
+  doc_type_id    Int
+  document_types document_types @relation(fields: [doc_type_id], references: [id], onDelete: Cascade, map: "fk_companies_document_types")
+}
+
+model customers {
+  id                 Int     @id @default(autoincrement())
+  uid                String  @default(dbgenerated("replace((gen_random_uuid())::text, '-'::text, ''::text)")) @db.VarChar(35)
+  doc_type           Int
+  tax_id             String? @db.VarChar(15)
+  first_name         String  @db.VarChar(50)
+  middle_name        String  @db.VarChar(50)
+  last_name          String  @db.VarChar(50)
+  second_last_name   String  @db.VarChar(50)
+  full_name          String  @db.VarChar(200)
+  nationality_code   String  @db.VarChar(5)
+  zip_code           String  @db.VarChar(20)
+  address            String  @db.VarChar(255)
+  address_line2      String? @db.VarChar(255)
+  country_code       String  @default(dbgenerated("(+ 51)")) @db.VarChar(5)
+  phone_number       String  @db.VarChar(20)
+  other_phone_number String? @db.VarChar(20)
+  email              String  @db.VarChar(100)
+}
+
+model document_types {
+  id           Int         @id @default(autoincrement())
+  uid          String      @default(dbgenerated("replace((gen_random_uuid())::text, '-'::text, ''::text)")) @db.VarChar(35)
+  name         String      @db.VarChar(50)
+  abbreviation String?     @db.VarChar(20)
+  is_active    Boolean?    @default(true)
+  created_at   DateTime?   @default(now()) @db.Timestamp(6)
+  updated_at   DateTime?   @db.Timestamp(6)
+  companies    companies[]
+}
+
+model establishment_types {
+  id Int @id @default(autoincrement())
+}
+
+model establishments {
+  id                  Int                   @id @default(autoincrement())
+  uid                 String                @default(dbgenerated("replace((gen_random_uuid())::text, '-'::text, ''::text)")) @db.VarChar(35)
+  name                String?               @db.VarChar(50)
+  location_code       String?               @db.VarChar(10)
+  address             String?               @db.VarChar(255)
+  lat                 Decimal?              @db.Decimal(10, 8)
+  lon                 Decimal?              @db.Decimal(10, 8)
+  company_uid         String?               @db.VarChar(35)
+  sap_eid             String?               @db.VarChar(10)
+  property_1          String?               @db.VarChar(50)
+  is_active           Boolean?              @default(true)
+  created_at          DateTime?             @default(now()) @db.Timestamp(6)
+  updated_at          DateTime?             @db.Timestamp(6)
+  user_establishments user_establishments[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model modules {
+  id                      Int                       @id @default(autoincrement())
+  uid                     String                    @default(dbgenerated("replace((gen_random_uuid())::text, '-'::text, ''::text)")) @db.VarChar(35)
+  name                    String                    @db.VarChar(50)
+  parent_id               Int?
+  icon                    String?                   @db.VarChar(50)
+  route                   String?                   @db.VarChar(100)
+  sort_order              Int?                      @db.SmallInt
+  is_active               Boolean                   @default(true)
+  created_at              DateTime                  @default(now()) @db.Timestamp(6)
+  modules                 modules                   @relation("modulesTomodules", fields: [id], references: [id], onDelete: Cascade, map: "fk_modules_modules")
+  other_modules           modules?                  @relation("modulesTomodules")
+  user_module_permissions user_module_permissions[]
+}
+
+model permissions {
+  id                              Int                               @id
+  uid                             String?                           @default(dbgenerated("replace((gen_random_uuid())::text, '-'::text, ''::text)")) @db.VarChar(35)
+  name                            String?                           @db.VarChar(50)
+  is_active                       Boolean?                          @default(true)
+  user_module_permission_advances user_module_permission_advances[]
+}
+
+model roles {
+  id          Int       @id @default(autoincrement())
+  uid         String    @default(dbgenerated("replace((gen_random_uuid())::text, '-'::text, ''::text)")) @db.VarChar(35)
+  description String?   @db.VarChar(30)
+  is_active   Boolean   @default(true)
+  created_at  DateTime  @default(now()) @db.Timestamp(6)
+  updated_At  DateTime? @db.Timestamp(6)
+  users       users[]
+}
+
+model sessions {
+  id           Int       @id @default(autoincrement())
+  user_id      Int
+  socket_id    String    @db.VarChar(50)
+  is_active    Boolean?  @default(true)
+  created_at   DateTime? @default(now()) @db.Timestamp(6)
+  user_agent   String?   @db.VarChar(255)
+  ip_address   String?   @db.VarChar(45)
+  last_seen_at DateTime? @default(now()) @db.Timestamp(6)
+  users        users     @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_sessions_users")
+}
+
+model user_establishments {
+  id             Int            @id @default(autoincrement())
+  est_id         Int
+  user_id        Int
+  created_at     DateTime?      @default(now()) @db.Timestamp(6)
+  updated_at     DateTime?      @db.Timestamp(6)
+  establishments establishments @relation(fields: [est_id], references: [id], onDelete: Cascade, map: "fk_userEstablishiments_establishments")
+  users          users          @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_users")
+}
+
+model user_module_permission_advances {
+  id                      Int                     @id @default(autoincrement())
+  user_mod_perm_id        Int
+  perm_id                 Int
+  created_at              DateTime                @default(now()) @db.Timestamp(6)
+  updated_at              DateTime?               @db.Timestamp(6)
+  is_active               Boolean                 @default(true)
+  permissions             permissions             @relation(fields: [perm_id], references: [id], onDelete: Cascade, map: "fk_userModulePermissionAdvances_permissions")
+  user_module_permissions user_module_permissions @relation(fields: [user_mod_perm_id], references: [id], onDelete: Cascade, map: "fk_userModulePermissionAdvances_userModulePermissions")
+}
+
+model user_module_permissions {
+  id                              Int                               @id @default(autoincrement())
+  user_id                         Int
+  mod_id                          Int
+  user_module_permission_advances user_module_permission_advances[]
+  modules                         modules                           @relation(fields: [mod_id], references: [id], onDelete: Cascade, map: "fk_userModulePermissions_modules")
+  users                           users                             @relation(fields: [user_id], references: [id], onDelete: Cascade, map: "fk_userModulePermissions_users")
+}
+
+model users {
+  id                                       Int                       @id @default(autoincrement())
+  uid                                      String                    @default(dbgenerated("replace((gen_random_uuid())::text, '-'::text, ''::text)")) @db.VarChar(35)
+  rol_id                                   Int?
+  username                                 String?                   @db.VarChar(50)
+  email                                    String                    @db.VarChar(100)
+  password_hash                            String?                   @db.VarChar(255)
+  image_url                                String?                   @db.VarChar(255)
+  alias                                    String?                   @db.VarChar(255)
+  auth_id                                  String?                   @db.VarChar(255)
+  type_auth                                String                    @default("CREDENTIALS") @db.VarChar(20)
+  is_active                                Boolean                   @default(false)
+  created_at                               DateTime                  @default(now()) @db.Timestamp(6)
+  updated_at                               DateTime?                 @db.Timestamp(6)
+  creator_user_id                          Int?
+  updater_user_id                          Int?
+  sessions                                 sessions[]
+  user_establishments                      user_establishments[]
+  user_module_permissions                  user_module_permissions[]
+  users_users_creator_user_idTousers       users?                    @relation("users_creator_user_idTousers", fields: [creator_user_id], references: [id], onDelete: Cascade, map: "fk_creator_user_id")
+  other_users_users_creator_user_idTousers users[]                   @relation("users_creator_user_idTousers")
+  users_users_updater_user_idTousers       users?                    @relation("users_updater_user_idTousers", fields: [updater_user_id], references: [id], onDelete: Cascade, map: "fk_updater_user_id")
+  other_users_users_updater_user_idTousers users[]                   @relation("users_updater_user_idTousers")
+  roles                                    roles?                    @relation(fields: [rol_id], references: [id], onDelete: Cascade, map: "fk_users_roles")
+}

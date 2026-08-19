@@ -24,3 +24,17 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
+
+# opencode
+AGENTS.md
+.agents
+/.agents
+skills-lock.json
+
+certificates
+.opencode
+.superpowers
+CLAUDE.md
+
+.claude
+/.claude
