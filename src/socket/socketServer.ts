@@ -24,6 +24,7 @@ export function setupSocket(io: Server) {
 
         socket.on('disconnect', () => {
             console.log(`Socket desconectado: ${socket.id}`)
+            // Eliminamos el socket del usuario del socketStore y cerramos la sesión en la base de datos
 
             if (userId) {
                 socketStore.remove(userId, socket.id)
